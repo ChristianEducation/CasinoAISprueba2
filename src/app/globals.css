@@ -1,0 +1,486 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222.2 84% 4.9%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96%;
+    --accent-foreground: 222.2 84% 4.9%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 84% 4.9%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 94.1%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer components {
+  /* Utilidades para manejo de texto mejoradas */
+  .text-truncate-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  
+  .text-truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  
+  .text-truncate-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+  
+  .text-truncate-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  /* Utilidad para line-clamp */
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Estilos para tarjetas mejoradas */
+  .card-enhanced {
+    @apply bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden;
+  }
+  
+  .card-content-enhanced {
+    @apply p-4 space-y-3 overflow-hidden;
+  }
+  
+  .card-header-enhanced {
+    @apply flex items-start justify-between mb-3;
+  }
+  
+  .card-title-enhanced {
+    @apply font-semibold text-slate-900 dark:text-slate-100 leading-tight;
+  }
+  
+  .card-description-enhanced {
+    @apply text-sm text-slate-600 dark:text-slate-400 leading-relaxed;
+  }
+  
+  /* Estilos para badges mejorados */
+  .badge-enhanced {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium flex-shrink-0;
+  }
+  
+  .badge-almuerzo {
+    @apply bg-blue-100 text-blue-700 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800;
+  }
+  
+  .badge-colacion {
+    @apply bg-emerald-100 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-300 dark:border-emerald-800;
+  }
+  
+  .badge-available {
+    @apply bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/30 dark:text-green-300 dark:border-green-800;
+  }
+  
+  .badge-unavailable {
+    @apply bg-red-100 text-red-700 border border-red-200 dark:bg-red-900/30 dark:text-red-300 dark:border-red-800;
+  }
+
+  /* Estilos para precios */
+  .price-display {
+    @apply text-lg font-bold text-slate-900 dark:text-slate-100;
+  }
+  
+  .price-label {
+    @apply text-xs text-slate-500 dark:text-slate-400 font-medium;
+  }
+
+  /* Panel cards para dashboard */
+  .panel-card {
+    @apply bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden;
+  }
+  
+  .panel-card-content {
+    @apply p-6 overflow-hidden;
+  }
+
+  /* Tooltip personalizado */
+  .tooltip-content {
+    @apply bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 px-3 py-2 rounded-lg text-sm font-medium shadow-lg;
+  }
+
+  /* Contenedores con scroll personalizado */
+  .scroll-container {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) transparent;
+  }
+  
+  .scroll-container::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scroll-container::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scroll-container::-webkit-scrollbar-thumb {
+    background-color: rgb(203 213 225);
+    border-radius: 3px;
+  }
+  
+  .scroll-container::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(148 163 184);
+  }
+
+  /* Estilos para sidebar del menú */
+  .menu-sidebar {
+    @apply bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700;
+  }
+
+  .menu-sidebar-item {
+    @apply w-full p-4 rounded-lg border text-left transition-all duration-200 hover:shadow-md hover:bg-slate-50 dark:hover:bg-slate-600;
+  }
+
+  .menu-sidebar-item.active {
+    @apply bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 shadow-sm;
+  }
+
+  .menu-sidebar-item.past {
+    @apply opacity-60;
+  }
+
+  /* Prevenir overflow en contenedores */
+  .prevent-overflow {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Flex containers que manejan overflow correctamente */
+  .flex-container-safe {
+    display: flex;
+    min-width: 0;
+  }
+
+  .flex-container-safe > * {
+    min-width: 0;
+  }
+
+  /* Grid containers seguros */
+  .grid-container-safe {
+    display: grid;
+    min-width: 0;
+  }
+
+  .grid-container-safe > * {
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  /* Estilos específicos para evitar overflow en admin cards */
+  .admin-card-container {
+    @apply min-w-0 overflow-hidden;
+  }
+
+  .admin-card-content {
+    @apply overflow-hidden;
+  }
+
+  .admin-card-text {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    hyphens: auto;
+    line-height: 1.3;
+    max-width: 100%;
+  }
+
+  /* Estilos específicos para tarjetas de menú compactas */
+  .menu-card-compact {
+    @apply min-h-0 max-w-full;
+  }
+
+  .menu-card-compact .admin-card-text {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    word-spacing: -0.05em;
+    letter-spacing: -0.01em;
+  }
+
+  /* Mejoras para texto muy largo */
+  .text-ultra-compact {
+    font-size: 0.7rem;
+    line-height: 1.1;
+    word-spacing: -0.1em;
+    letter-spacing: -0.02em;
+    font-weight: 500;
+  }
+
+  /* Estilos para gradientes suaves */
+  .gradient-blue-soft {
+    background: linear-gradient(135deg, rgb(239 246 255) 0%, rgb(219 234 254) 100%);
+  }
+
+  .gradient-emerald-soft {
+    background: linear-gradient(135deg, rgb(236 253 245) 0%, rgb(209 250 229) 100%);
+  }
+
+  .gradient-slate-soft {
+    background: linear-gradient(135deg, rgb(248 250 252) 0%, rgb(241 245 249) 100%);
+  }
+
+  /* Dark mode gradients */
+  .dark .gradient-blue-soft {
+    background: linear-gradient(135deg, rgb(30 58 138 / 0.2) 0%, rgb(29 78 216 / 0.1) 100%);
+  }
+
+  .dark .gradient-emerald-soft {
+    background: linear-gradient(135deg, rgb(6 78 59 / 0.2) 0%, rgb(5 150 105 / 0.1) 100%);
+  }
+
+  .dark .gradient-slate-soft {
+    background: linear-gradient(135deg, rgb(51 65 85 / 0.5) 0%, rgb(71 85 105 / 0.25) 100%);
+  }
+}
+
+@layer utilities {
+  /* Utilidades personalizadas para manejo de texto */
+  .break-anywhere {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  
+  .text-wrap-balance {
+    text-wrap: balance;
+  }
+  
+  .text-wrap-pretty {
+    text-wrap: pretty;
+  }
+
+  /* Utilidades para contenido compacto */
+  .compact-spacing {
+    @apply space-y-1;
+  }
+
+  .ultra-compact-spacing {
+    @apply space-y-0.5;
+  }
+
+  /* Utilidades para scroll suave */
+  .scroll-smooth-custom {
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Utilidades para sombras suaves */
+  .shadow-soft {
+    box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  }
+
+  .shadow-soft-lg {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+
+  /* Utilidades para backdrop blur */
+  .backdrop-blur-soft {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Scrollbar personalizado para el resumen del pedido */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-slate-300::-webkit-scrollbar-thumb {
+    background-color: rgb(203 213 225);
+    border-radius: 0.375rem;
+  }
+  
+  .dark .scrollbar-thumb-slate-600::-webkit-scrollbar-thumb {
+    background-color: rgb(71 85 105);
+    border-radius: 0.375rem;
+  }
+  
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(203 213 225);
+    border-radius: 0.375rem;
+  }
+  
+  .dark .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgb(71 85 105);
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  /* Asegurar que el sticky funcione correctamente */
+  .sticky-sidebar {
+    position: sticky;
+    top: 1.5rem;
+    align-self: flex-start;
+    max-height: calc(100vh - 3rem);
+  }
+}
+
+/* Animaciones suaves */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.3s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
+
+/* Mejoras para accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Estilos para texto limpio */
+.text-clean {
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Responsive grid mejorado */
+@media (min-width: 768px) {
+  .admin-grid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .admin-grid {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .admin-grid {
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  }
+}
+
+/* Mejoras específicas para textos largos en tarjetas pequeñas */
+@media (max-width: 1280px) {
+  .admin-card-text {
+    font-size: 0.7rem;
+    line-height: 1.2;
+  }
+  
+  .menu-card-compact {
+    min-height: auto;
+  }
+}
+
+/* Estilos para pantallas muy pequeñas */
+@media (max-width: 768px) {
+  .admin-card-text {
+    font-size: 0.65rem;
+    line-height: 1.1;
+  }
+}
