@@ -130,7 +130,7 @@ export function useOrderManagement(): UseOrderManagementReturn {
     } finally {
       setIsLoadingOrder(false)
     }
-  }, [user, weekInfo, setExistingOrders])
+  }, [user, weekInfo, setExistingOrders, setExistingOrdersInStore])
 
   // Función para refrescar pedidos
   const refreshOrders = useCallback(async () => {
