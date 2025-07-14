@@ -54,6 +54,7 @@ export default function ChildrenManager({ user, initialChildren, onChildrenChang
   const [isLoadingData, setIsLoadingData] = useState(false)
 
   // Cargar niveles al montar
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadLevels()
   }, [])
@@ -322,7 +323,7 @@ export default function ChildrenManager({ user, initialChildren, onChildrenChang
         {hasUnsavedChanges && (
           <div className="mt-2 p-2 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg">
             <p className="text-sm text-amber-800 dark:text-amber-200">
-              ⚠️ Tienes cambios sin guardar. Usa el botón "Guardar cambios" en la parte inferior para confirmar los cambios.
+              ⚠️ Tienes cambios sin guardar. Usa el botón “Guardar cambios“ en la parte inferior para confirmar los cambios.
             </p>
           </div>
         )}
