@@ -9,7 +9,6 @@ import {
   Timestamp,
   getDoc,
   orderBy,
-  limit,
   DocumentData
 } from 'firebase/firestore'
 import { db } from '@/app/lib/firebase'
@@ -487,7 +486,6 @@ export class OrderService {
     }
     
     // Advertencias informativas (no bloquean el pago)
-    const weekDaysLaboral = weekDays.filter((_, index) => index < 5) // Solo lunes a viernes
     const selectionsWithAlmuerzo = selections.filter(s => s.almuerzo)
     const selectionsWithColacion = selections.filter(s => s.colacion)
     
@@ -547,7 +545,6 @@ export class OrderService {
     }
     
     // Advertencias informativas
-    const weekDaysLaboral = weekDays.filter((_, index) => index < 5) // Solo lunes a viernes
     const selectionsWithAlmuerzo = selections.filter(s => s.almuerzo)
     const selectionsWithColacion = selections.filter(s => s.colacion)
     
