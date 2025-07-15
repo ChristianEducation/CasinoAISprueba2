@@ -239,6 +239,8 @@ export class PaymentService {
         case 'paid':
         case 'completed':
         case 'success':
+        case 'authorized':
+        case 'created':
           console.log(`Payment approved for order ${orderId}, transaction: ${transactionId}, amount: ${amount}`)
           
           // Marcar pedido como pagado
