@@ -158,6 +158,8 @@ export async function POST(request: NextRequest) {
         normalizedStatus === 'EXITOSO' ||
         normalizedStatus === 'SUCCESSFUL' ||
         normalizedStatus === 'CONFIRMED' ||
+        normalizedStatus === 'AUTHORIZED' ||
+        normalizedStatus === 'CREATED'    ||
         normalizedStatus === 'CONFIRMADO') {
       
       // Pago exitoso
