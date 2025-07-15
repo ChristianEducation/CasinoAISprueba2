@@ -107,7 +107,7 @@ export class AdminMenuService {
     // Permitir navegar hasta 4 semanas atrás y 8 semanas adelante
     const now = new Date()
     const minWeek = subWeeks(now, 4)
-    const maxWeek = addWeeks(now, 8)
+    const maxWeek = addWeeks(now, 24)
     
     return {
       currentWeek,
