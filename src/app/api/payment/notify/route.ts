@@ -74,23 +74,6 @@ export async function POST(request: NextRequest) {
     
     console.log('Parsed GetNet notification:', JSON.stringify(notificationData, null, 2))
     
-    const sig     = notificationData.signature as string
-    const payload = String(requestId)
-                  + String(notificationData.status?.status)
-                  + String(notificationData.status?.date)
-                  + (process.env.GETNET_SECRET || '')
-    const expected = crypto
-      .createHash('sha1')
-      .update(payload)
-      .digest('hex')
-   if (sig !== expected) {
-      console.warn('⚠️ Firma inválida', { expected, received: sig })
-      return NextResponse.json(
-        { success: false, error: 'Invalid signature' },
-        { status: 400 }
-      )
-   }
-
     // Extraer información clave de la notificación
     const orderId = notificationData.reference || 
                    notificationData.transaction?.reference ||
@@ -112,6 +95,23 @@ export async function POST(request: NextRequest) {
       requestId,
       statusMessage: notificationData.status?.message
     })
+    const sig     = notificationData.signature as string
+    const payload = String(requestId)
+                  + String(notificationData.status?.status)
+                  + String(notificationData.status?.date)
+                  + (process.env.GETNET_SECRET || '')
+    const expected = crypto
+      .createHash('sha1')
+      .update(payload)
+      .digest('hex')
+
+    if (sig !== expected) {
+      console.warn('⚠️ Firma inválida', { expected, received: sig })
+      return NextResponse.json(
+        { success: false, error: 'Invalid signature' },
+        { status: 400 }
+      )
+    }
 
     // Validar que tenemos los datos mínimos requeridos
     if (!orderId) {
