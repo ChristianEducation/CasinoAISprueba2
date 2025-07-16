@@ -158,7 +158,8 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
                     key={item.id}
                     item={item}
                     userType={userType}
-                    index={itemIndex}
+                    date={dayMenu.date}
+                    child={null}
                     optionNumber={itemIndex + 1}
                   />
                 ))}
@@ -203,7 +204,8 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
                     key={item.id}
                     item={item}
                     userType={userType}
-                    index={itemIndex}
+                    date={dayMenu.date}
+                    child={null}
                     optionNumber={itemIndex + 1}
                   />
                 ))}
