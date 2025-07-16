@@ -49,6 +49,12 @@ interface OrderState {
   setExistingOrders: (orderIds: string[]) => void
   clearAllSelections: () => void // Limpia todo después del pago exitoso
   hasExistingOrder: (date: string, childId?: string) => boolean
+  removeItemFromSelection: (
+    date: string,
+    itemId: string,
+    itemType: 'almuerzo' | 'colacion',
+    child: Child | null
+  ) => void
 }
 
 export const useOrderStore = create<OrderState>()(
@@ -338,6 +344,82 @@ export const useOrderStore = create<OrderState>()(
         const { existingOrders } = get()
         const orderKey = `${date}-${childId || 'funcionario'}`
         return existingOrders.includes(orderKey)
+      },
+  
+      removeItemFromSelection: (
+        date: string,
+        itemId: string,
+        itemType: 'almuerzo' | 'colacion',
+        child: Child | null
+      ) => {
+        const { selectionsByChild } = get()
+        const existingIndex = selectionsByChild.findIndex(
+          s => s.date === date && 
+               (s.hijo?.id === child?.id || (!s.hijo && !child))
+        )
+        
+        if (existingIndex < 0) return; // No hay selección para este día/niño
+        
+        const updated = [...selectionsByChild];
+        const currentSelection = {...updated[existingIndex]};
+        const fieldArray = `${itemType}s` as 'almuerzos' | 'colaciones';
+        
+        // Si no hay un array para este tipo de ítem, revisar el campo individual
+        if (!currentSelection[fieldArray] || currentSelection[fieldArray]?.length === 0) {
+          // Verificar si el ítem individual coincide con el que queremos eliminar
+          const singleItem = currentSelection[itemType];
+          if (singleItem?.id === itemId) {
+            // Eliminar el ítem individual
+            const newSelection = {...currentSelection};
+            delete newSelection[itemType];
+            
+            // Si no quedan selecciones, eliminar la entrada completa
+            if (!newSelection.almuerzo && !newSelection.colacion && 
+                (!newSelection.almuerzos?.length) && (!newSelection.colaciones?.length)) {
+              updated.splice(existingIndex, 1);
+            } else {
+              updated[existingIndex] = newSelection;
+            }
+            
+            set({ selectionsByChild: updated });
+          }
+          return;
+        }
+        
+        // Buscar el índice del ítem a eliminar en el array
+        const itemIndex = currentSelection[fieldArray]!.findIndex(i => i.id === itemId);
+        if (itemIndex >= 0) {
+          // Crear un nuevo array sin el ítem eliminado
+          const newItems = [...currentSelection[fieldArray]!];
+          newItems.splice(itemIndex, 1);
+          
+          // Actualizar la selección
+          currentSelection[fieldArray] = newItems;
+          
+          // Si el array queda vacío, eliminarlo
+          if (newItems.length === 0) {
+            delete currentSelection[fieldArray];
+            
+            // También eliminar el ítem individual si coincide con el ID
+            if (currentSelection[itemType]?.id === itemId) {
+              delete currentSelection[itemType];
+            }
+          } else {
+            // Si queda al menos un ítem, actualizar el ítem individual para mantener compatibilidad
+            currentSelection[itemType] = newItems[0];
+          }
+          
+          // Si no quedan selecciones, eliminar la entrada completa
+          if (!currentSelection.almuerzo && !currentSelection.colacion && 
+              (!currentSelection.almuerzos?.length) && (!currentSelection.colaciones?.length)) {
+            updated.splice(existingIndex, 1);
+          } else {
+            updated[existingIndex] = currentSelection;
+          }
+          
+          set({ selectionsByChild: updated });
+          console.log(`🗑️ Se eliminó una unidad de ${itemType} con ID: ${itemId}`);
+        }
       }
     }),
     {
