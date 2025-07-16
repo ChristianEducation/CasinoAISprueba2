@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useOrderStore } from '@/store/orderStore'
-import type { Child } from '@/types/child'
+import type { Child } from '@/types/user'
 
 interface MenuItemCardProps {
   item: MenuItem
