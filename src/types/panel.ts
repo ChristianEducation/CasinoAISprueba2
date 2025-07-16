@@ -78,6 +78,9 @@ export interface OrderSelectionByChild {
     almuerzo?: MenuItem
     colacion?: MenuItem
   }
+  // Nuevos campos para soportar múltiples selecciones
+  almuerzos?: MenuItem[]
+  colaciones?: MenuItem[]
 }
 
 export interface OrderSelection {
