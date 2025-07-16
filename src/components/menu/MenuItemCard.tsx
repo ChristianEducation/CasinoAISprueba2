@@ -1,6 +1,4 @@
 "use client"
-
-import { motion } from 'framer-motion'
 import { Check, X, Info, DollarSign, MinusCircle, PlusCircle } from 'lucide-react'
 import { MenuItem } from '@/types/menu'
 import { useState, useEffect } from 'react'
@@ -94,10 +92,7 @@ export function MenuItemCard({
   const shouldTruncateDescription = isLongDescription && !showFullDescription
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.1 }}
+    <div
       className="mb-4"
       key={item.id}
     >
@@ -120,7 +115,7 @@ export function MenuItemCard({
                     : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
                 }`}>
                   Opción {optionNumber}
-                </Badge>
+                </div>
                 
                 {/* Mostrar badge de cantidad si está seleccionado */}
                 {quantity > 0 && (
@@ -239,6 +234,6 @@ export function MenuItemCard({
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   )
 }
