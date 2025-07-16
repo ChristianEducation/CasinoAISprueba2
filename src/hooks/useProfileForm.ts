@@ -312,8 +312,42 @@ export function useProfileForm(): UseProfileFormReturn {
   }
 
   const saveChanges = async (): Promise<boolean> => {
-    if (!validateForm() || !user || !auth.currentUser) {
-      return false
+    console.log('🔄 Iniciando guardado de cambios...');
+    console.log('👨‍👩‍👧‍👦 Children actuales:', children.length, children);
+    console.log('👨‍👩‍👧‍👦 Children originales:', originalChildren.length, originalChildren);
+    console.log('🔍 hasChanges detectado por React:', hasChanges);
+    
+    // Forzar detección de cambios en los hijos comparando cantidades
+    const hasChildrenChangesCount = children.length !== originalChildren.length;
+    
+    // También comparar contenido de los arrays para mayor seguridad
+    const childrenJson = JSON.stringify(children);
+    const originalChildrenJson = JSON.stringify(originalChildren);
+    const hasChildrenContentChanges = childrenJson !== originalChildrenJson;
+    
+    const forceUpdate = hasChildrenChangesCount || hasChildrenContentChanges;
+    
+    if (forceUpdate) {
+      console.log('✅ Cambios en hijos detectados manualmente:', 
+        hasChildrenChangesCount ? 'diferente cantidad' : 'mismo número pero contenido diferente');
+    }
+    
+    // Validar formulario solo si no hay cambios forzados en hijos
+    if (!forceUpdate && !hasChanges) {
+      console.log('❌ No se detectaron cambios que guardar');
+      return false;
+    }
+    
+    // Validar usuario disponible
+    if (!user || !auth.currentUser) {
+      console.log('❌ Usuario no disponible');
+      return false;
+    }
+    
+    // Validar formulario si hay cambios no relacionados a hijos
+    if (!forceUpdate && !validateForm()) {
+      console.log('❌ Validación de formulario fallida');
+      return false;
     }
 
     setIsSaving(true)
