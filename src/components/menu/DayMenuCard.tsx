@@ -27,9 +27,6 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
   if (!dayMenu.hasItems) {
     return (
       <div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
         className="max-w-2xl mx-auto"
       >
         <Card className="border-0 bg-white dark:bg-slate-800 shadow-lg">
@@ -51,9 +48,6 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
 
   return (
     <div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.1 }}
       className="space-y-6"
     >
       {/* Header del día */}
@@ -125,11 +119,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
 
       {/* Almuerzos */}
       {dayMenu.almuerzos.length > 0 && (
-        <div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
+        <div>
           <Card className="border-0 bg-white dark:bg-slate-800 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center space-x-3 mb-6">
@@ -155,7 +145,6 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
               <div className="grid gap-4">
                 {dayMenu.almuerzos.map((item, itemIndex) => (
                   <MenuItemCard
-                    key={item.id}
                     item={item}
                     userType={userType}
                     date={dayMenu.date}
@@ -171,11 +160,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
 
       {/* Colaciones */}
       {dayMenu.colaciones.length > 0 && (
-        <div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
+        <div>
           <Card className="border-0 bg-white dark:bg-slate-800 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center space-x-3 mb-6">
@@ -201,7 +186,6 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
               <div className="grid gap-4">
                 {dayMenu.colaciones.map((item, itemIndex) => (
                   <MenuItemCard
-                    key={item.id}
                     item={item}
                     userType={userType}
                     date={dayMenu.date}
@@ -216,11 +200,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
       )}
 
       {/* Información adicional */}
-      <div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
+      <div>
         <Card className="border-0 bg-gradient-to-r from-slate-50 to-slate-25 dark:from-slate-800/50 dark:to-slate-700/25 shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-start space-x-3">
