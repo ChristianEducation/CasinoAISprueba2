@@ -1,12 +1,13 @@
 "use client"
 
 import { motion } from 'framer-motion'
-import { Check, X, Info, DollarSign } from 'lucide-react'
+import { Check, X, Info, DollarSign, MinusCircle, PlusCircle } from 'lucide-react'
 import { MenuItem } from '@/types/menu'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useOrderStore } from '@/store/orderStore'
 
 interface MenuItemCardProps {
   item: MenuItem
@@ -17,13 +18,64 @@ interface MenuItemCardProps {
 
 export function MenuItemCard({ item, userType, index, optionNumber }: MenuItemCardProps) {
   const [showFullDescription, setShowFullDescription] = useState(false)
-
+  const [quantity, setQuantity] = useState(0)
+  
+  // Acceder a orderStore para comprobar si este ítem ya está seleccionado
+  const { selectionsByChild, updateSelectionByChild, currentChild, removeItemFromSelection } = useOrderStore()
+  
+  // Comprobar si el ítem está seleccionado y con qué cantidad
+  const getSelectedQuantity = () => {
+    const selection = selectionsByChild.find(
+      s => s.date === item.date && 
+           (s.hijo?.id === currentChild?.id || (!s.hijo && !currentChild))
+    )
+    
+    if (!selection) return 0;
+    
+    // Comprobar en el array correspondiente (almuerzos o colaciones)
+    const itemArray = item.type === 'almuerzo' ? selection.almuerzos : selection.colaciones;
+    
+    if (itemArray) {
+      // Contar cuántas veces aparece este ítem en el array
+      return itemArray.filter(i => i.id === item.id).length;
+    }
+    
+    // Comprobar en los campos individuales para retrocompatibilidad
+    const singleItem = item.type === 'almuerzo' ? selection.almuerzo : selection.colacion;
+    return singleItem?.id === item.id ? 1 : 0;
+  }
+  
+  // Actualizar la cantidad cuando cambian las selecciones
+  useEffect(() => {
+    setQuantity(getSelectedQuantity());
+  }, [item, currentChild, selectionsByChild]);
+  
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
       currency: 'CLP',
       minimumFractionDigits: 0
     }).format(price)
+  }
+  
+  const handleAddItem = () => {
+    if (!item.available) return;
+    
+    // Incrementar la cantidad y actualizar la selección en el store
+    const newQuantity = quantity + 1;
+    setQuantity(newQuantity);
+    updateSelectionByChild(item.date, item.type, item, currentChild);
+  }
+  
+  const handleRemoveItem = () => {
+    if (quantity <= 0) return;
+    
+    // Si llegamos a 0, eliminamos el ítem; de lo contrario, eliminamos una unidad
+    const newQuantity = quantity - 1;
+    setQuantity(newQuantity);
+    
+    // Usar la nueva función removeItemFromSelection para eliminar una unidad específica
+    removeItemFromSelection(item.date, item.id, item.type, currentChild);
   }
 
   const isLongDescription = item.description.length > 120
@@ -117,8 +169,8 @@ export function MenuItemCard({ item, userType, index, optionNumber }: MenuItemCa
               </div>
             </div>
 
-            {/* Precio */}
-            <div className="text-right flex-shrink-0">
+            {/* Precio y controles de cantidad */}
+            <div className="text-right flex-shrink-0 flex flex-col items-end">
               <div className="flex items-center space-x-1 mb-1">
                 <DollarSign className={`w-4 h-4 ${
                   item.available 
@@ -133,9 +185,41 @@ export function MenuItemCard({ item, userType, index, optionNumber }: MenuItemCa
                   {formatPrice(item.price)}
                 </span>
               </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400">
+              <div className="text-xs text-slate-500 dark:text-slate-400 mb-3">
                 CLP
               </div>
+              
+              {/* Controles de cantidad */}
+              {item.available && (
+                <div className="flex items-center space-x-2 mt-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full w-8 h-8 p-0 bg-slate-100 border-slate-300 hover:bg-slate-200"
+                    onClick={handleRemoveItem}
+                    disabled={quantity === 0}
+                  >
+                    <MinusCircle className="w-4 h-4 text-slate-700 dark:text-slate-200" />
+                  </Button>
+                  
+                  <span className={`text-lg font-semibold ${
+                    quantity > 0 
+                      ? 'text-blue-600 dark:text-blue-400' 
+                      : 'text-slate-600 dark:text-slate-400'
+                  }`}>
+                    {quantity}
+                  </span>
+                  
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full w-8 h-8 p-0 bg-blue-100 border-blue-300 hover:bg-blue-200"
+                    onClick={handleAddItem}
+                  >
+                    <PlusCircle className="w-4 h-4 text-blue-700 dark:text-blue-300" />
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
