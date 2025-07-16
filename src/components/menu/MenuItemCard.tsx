@@ -11,45 +11,58 @@ import { useOrderStore } from '@/store/orderStore'
 
 interface MenuItemCardProps {
   item: MenuItem
-  userType: 'apoderado' | 'funcionario'
-  index: number
-  optionNumber: number
+  type: 'almuerzo' | 'colacion'
+  date: string
 }
 
-export function MenuItemCard({ item, userType, index, optionNumber }: MenuItemCardProps) {
-  const [showFullDescription, setShowFullDescription] = useState(false)
+const MenuItemCard = ({
+  item,
+  type,
+  date
+}: MenuItemCardProps) => {
+  const { 
+    currentChild, 
+    selectionsByChild, 
+    updateSelectionByChild, 
+    removeItemFromSelection,
+    addItemToSelection 
+  } = useOrderStore()
+
+  // Estado local para verificar si el ítem está seleccionado
+  const [isSelected, setIsSelected] = useState(false)
   const [quantity, setQuantity] = useState(0)
-  
-  // Acceder a orderStore para comprobar si este ítem ya está seleccionado
-  const { selectionsByChild, updateSelectionByChild, currentChild, removeItemFromSelection } = useOrderStore()
-  
-  // Comprobar si el ítem está seleccionado y con qué cantidad
-  const getSelectedQuantity = () => {
-    const selection = selectionsByChild.find(
-      s => s.date === item.date && 
-           (s.hijo?.id === currentChild?.id || (!s.hijo && !currentChild))
-    )
-    
-    if (!selection) return 0;
-    
-    // Comprobar en el array correspondiente (almuerzos o colaciones)
-    const itemArray = item.type === 'almuerzo' ? selection.almuerzos : selection.colaciones;
-    
-    if (itemArray) {
-      // Contar cuántas veces aparece este ítem en el array
-      return itemArray.filter(i => i.id === item.id).length;
-    }
-    
-    // Comprobar en los campos individuales para retrocompatibilidad
-    const singleItem = item.type === 'almuerzo' ? selection.almuerzo : selection.colacion;
-    return singleItem?.id === item.id ? 1 : 0;
-  }
-  
-  // Actualizar la cantidad cuando cambian las selecciones
+  const [showFullDescription, setShowFullDescription] = useState(false)
+
+  // Verificar si este ítem está seleccionado para este día y niño
   useEffect(() => {
-    setQuantity(getSelectedQuantity());
-  }, [item, currentChild, selectionsByChild]);
-  
+    const selection = selectionsByChild.find(s =>
+      s.date === date && 
+      (s.hijo?.id === currentChild?.id || (!s.hijo && !currentChild))
+    )
+
+    if (selection) {
+      // Verificar en el array de múltiples selecciones
+      const arrayField = `${type}s` as 'almuerzos' | 'colaciones'
+      const itemsArray = selection[arrayField] as MenuItem[] | undefined
+
+      if (itemsArray && itemsArray.length > 0) {
+        // Contar cuántas veces aparece este ítem en el array (cantidad)
+        const count = itemsArray.filter(i => i.id === item.id).length
+        setQuantity(count)
+        setIsSelected(count > 0)
+      } else {
+        // Compatibilidad con selección única
+        const singleItem = selection[type] as MenuItem | undefined
+        const isSingleSelected = singleItem?.id === item.id
+        setIsSelected(isSingleSelected)
+        setQuantity(isSingleSelected ? 1 : 0)
+      }
+    } else {
+      setIsSelected(false)
+      setQuantity(0)
+    }
+  }, [selectionsByChild, date, currentChild, item, type])
+
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
@@ -57,25 +70,31 @@ export function MenuItemCard({ item, userType, index, optionNumber }: MenuItemCa
       minimumFractionDigits: 0
     }).format(price)
   }
-  
-  const handleAddItem = () => {
-    if (!item.available) return;
-    
-    // Incrementar la cantidad y actualizar la selección en el store
-    const newQuantity = quantity + 1;
-    setQuantity(newQuantity);
-    updateSelectionByChild(item.date, item.type, item, currentChild);
+
+  const handleSelect = () => {
+    if (item.available) {
+      // Si está seleccionado, lo deseleccionamos
+      // Si no está seleccionado, lo seleccionamos
+      if (isSelected) {
+        // Eliminar una unidad de este ítem
+        removeItemFromSelection(date, item.id, type, currentChild)
+      } else {
+        // Añadir el ítem (usando la nueva función específica)
+        addItemToSelection(date, type, item, currentChild)
+      }
+    }
   }
-  
+
+  const handleAddItem = () => {
+    if (item.available) {
+      // Añadir otra unidad del ítem usando la nueva función
+      addItemToSelection(date, type, item, currentChild)
+    }
+  }
+
   const handleRemoveItem = () => {
-    if (quantity <= 0) return;
-    
-    // Si llegamos a 0, eliminamos el ítem; de lo contrario, eliminamos una unidad
-    const newQuantity = quantity - 1;
-    setQuantity(newQuantity);
-    
-    // Usar la nueva función removeItemFromSelection para eliminar una unidad específica
-    removeItemFromSelection(item.date, item.id, item.type, currentChild);
+    // Eliminar una unidad del ítem
+    removeItemFromSelection(date, item.id, type, currentChild)
   }
 
   const isLongDescription = item.description.length > 120
@@ -89,7 +108,9 @@ export function MenuItemCard({ item, userType, index, optionNumber }: MenuItemCa
     >
       <Card className={`border-0 shadow-md hover:shadow-lg transition-all duration-300 ${
         item.available
-          ? 'bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600'
+          ? quantity > 0
+            ? 'bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-800'
+            : 'bg-white dark:bg-slate-700 hover:bg-slate-50 dark:hover:bg-slate-600'
           : 'bg-slate-50 dark:bg-slate-800 opacity-75'
       }`}>
         <CardContent className="p-5">
@@ -105,6 +126,14 @@ export function MenuItemCard({ item, userType, index, optionNumber }: MenuItemCa
                 }`}>
                   Opción {optionNumber}
                 </Badge>
+                
+                {/* Mostrar badge de cantidad si está seleccionado */}
+                {quantity > 0 && (
+                  <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+                    <Check className="w-3 h-3 mr-1" />
+                    {quantity > 1 ? `${quantity} unidades` : 'Seleccionado'}
+                  </Badge>
+                )}
                 
                 <Badge variant={item.available ? "default" : "destructive"} className="text-xs">
                   {item.available ? (
