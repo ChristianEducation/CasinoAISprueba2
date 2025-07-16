@@ -206,15 +206,15 @@ export async function POST(request: NextRequest) {
     } 
     // ESTADOS DE PAGO FALLIDO
     else if (normalizedStatus === 'FAILED' || 
-               normalizedStatus === 'REJECTED' || 
-               normalizedStatus === 'CANCELLED' || 
-               normalizedStatus === 'DECLINED' ||
-               normalizedStatus === 'RECHAZADA' ||
-               normalizedStatus === 'CANCELADA' ||
-               normalizedStatus === 'FALLIDA' ||
-               normalizedStatus === 'ERROR' ||
-               normalizedStatus === 'DENIED' ||
-               normalizedStatus === 'DENEGADA') {
+             normalizedStatus === 'REJECTED' || 
+             normalizedStatus === 'CANCELLED' || 
+             normalizedStatus === 'DECLINED' ||
+             normalizedStatus === 'RECHAZADA' ||
+             normalizedStatus === 'CANCELADA' ||
+             normalizedStatus === 'FALLIDA' ||
+             normalizedStatus === 'ERROR' ||
+             normalizedStatus === 'DENIED' ||
+             normalizedStatus === 'DENEGADA') {
       
       // Pago fallido
       console.log(`❌ Payment FAILED for order ${orderId}: ${notificationData.status?.message}`)
@@ -238,11 +238,11 @@ export async function POST(request: NextRequest) {
     } 
     // ESTADOS DE PAGO PENDIENTE
     else if (normalizedStatus === 'PENDING' || 
-               normalizedStatus === 'PROCESSING' ||
-               normalizedStatus === 'PENDIENTE' ||
-               normalizedStatus === 'PROCESANDO' ||
-               normalizedStatus === 'IN_PROGRESS' ||
-               normalizedStatus === 'EN_PROCESO') {
+             normalizedStatus === 'PROCESSING' ||
+             normalizedStatus === 'PENDIENTE' ||
+             normalizedStatus === 'PROCESANDO' ||
+             normalizedStatus === 'IN_PROGRESS' ||
+             normalizedStatus === 'EN_PROCESO') {
       
         // Pago pendiente
         console.log(`⏳ Payment PENDING for order ${orderId}`)
