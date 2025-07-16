@@ -239,7 +239,13 @@ export function useProfileForm(): UseProfileFormReturn {
   }
 
   const updateChildren = (newChildren: ExtendedChild[]) => {
-    setChildren(newChildren)
+    console.log('🔄 useProfileForm.updateChildren - Actualizando lista de', newChildren.length, 'hijos');
+    
+    // Actualizar el estado de children con los nuevos valores
+    setChildren([...newChildren]);
+    
+    // IMPORTANTE: No actualizar originalChildren aquí para mantener
+    // la referencia original y que hasChanges funcione correctamente
   }
 
   const validateForm = (): boolean => {
