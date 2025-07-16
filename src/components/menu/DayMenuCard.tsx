@@ -1,6 +1,6 @@
 "use client"
 
-import { motion } from 'framer-motion'
+// import { motion } from 'framer-motion'
 import { Calendar, Clock, AlertTriangle, Utensils, Coffee, Info } from 'lucide-react'
 import { DayMenuDisplay } from '@/types/menu'
 import { MenuItemCard } from './MenuItemCard'
@@ -26,7 +26,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
 
   if (!dayMenu.hasItems) {
     return (
-      <motion.div
+      <div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
@@ -45,12 +45,12 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
             </p>
           </CardContent>
         </Card>
-      </motion.div>
+      </div>
     )
   }
 
   return (
-    <motion.div
+    <div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.1 }}
@@ -125,7 +125,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
 
       {/* Almuerzos */}
       {dayMenu.almuerzos.length > 0 && (
-        <motion.div
+        <div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
@@ -166,12 +166,12 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
 
       {/* Colaciones */}
       {dayMenu.colaciones.length > 0 && (
-        <motion.div
+        <div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -212,11 +212,11 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       )}
 
       {/* Información adicional */}
-      <motion.div
+      <div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
@@ -244,7 +244,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
             </div>
           </CardContent>
         </Card>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   )
 }
