@@ -55,6 +55,12 @@ interface OrderState {
     itemType: 'almuerzo' | 'colacion',
     child: Child | null
   ) => void
+  addItemToSelection: (
+    date: string,
+    field: 'almuerzo' | 'colacion',
+    item: MenuItem,
+    child: Child | null
+  ) => void
 }
 
 export const useOrderStore = create<OrderState>()(
@@ -200,7 +206,7 @@ export const useOrderStore = create<OrderState>()(
         
         if (existingIndex >= 0) {
           const updated = [...selectionsByChild]
-          const currentSelection = updated[existingIndex]
+          const currentSelection = {...updated[existingIndex]}
           
           if (item) {
             // Agregar o actualizar el campo
