@@ -6,62 +6,62 @@ import { MenuItem } from '@/types/menu'
 import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import type { HTMLAttributes } from 'react'
 import { Button } from '@/components/ui/button'
 import { useOrderStore } from '@/store/orderStore'
+import { Child } from '@/types/child'
 
 interface MenuItemCardProps {
   item: MenuItem
-  type: 'almuerzo' | 'colacion'
-  date: string
+  userType: 'apoderado' | 'funcionario'
+  index: number
+  optionNumber: number
 }
 
-const MenuItemCard = ({
+export function MenuItemCard({
   item,
-  type,
-  date
-}: MenuItemCardProps) => {
+  userType,
+  index,
+  optionNumber
+}: MenuItemCardProps) {
+  // Estados locales
+  const [showFullDescription, setShowFullDescription] = useState(false)
+  const [quantity, setQuantity] = useState(0)
+  
+  // Acceder a orderStore para manejar selecciones
   const { 
-    currentChild, 
     selectionsByChild, 
-    updateSelectionByChild, 
+    currentChild, 
     removeItemFromSelection,
     addItemToSelection 
   } = useOrderStore()
 
-  // Estado local para verificar si el ítem está seleccionado
-  const [isSelected, setIsSelected] = useState(false)
-  const [quantity, setQuantity] = useState(0)
-  const [showFullDescription, setShowFullDescription] = useState(false)
-
-  // Verificar si este ítem está seleccionado para este día y niño
-  useEffect(() => {
-    const selection = selectionsByChild.find(s =>
-      s.date === date && 
-      (s.hijo?.id === currentChild?.id || (!s.hijo && !currentChild))
+  // Comprobar si el ítem está seleccionado y con qué cantidad
+  const getSelectedQuantity = () => {
+    const selection = selectionsByChild.find(
+      (s: any) => s.date === item.date && 
+           (s.hijo?.id === currentChild?.id || (!s.hijo && !currentChild))
     )
-
-    if (selection) {
-      // Verificar en el array de múltiples selecciones
-      const arrayField = `${type}s` as 'almuerzos' | 'colaciones'
-      const itemsArray = selection[arrayField] as MenuItem[] | undefined
-
-      if (itemsArray && itemsArray.length > 0) {
-        // Contar cuántas veces aparece este ítem en el array (cantidad)
-        const count = itemsArray.filter(i => i.id === item.id).length
-        setQuantity(count)
-        setIsSelected(count > 0)
-      } else {
-        // Compatibilidad con selección única
-        const singleItem = selection[type] as MenuItem | undefined
-        const isSingleSelected = singleItem?.id === item.id
-        setIsSelected(isSingleSelected)
-        setQuantity(isSingleSelected ? 1 : 0)
-      }
-    } else {
-      setIsSelected(false)
-      setQuantity(0)
+    
+    if (!selection) return 0;
+    
+    // Comprobar en el array correspondiente (almuerzos o colaciones)
+    const itemArray = item.type === 'almuerzo' ? selection.almuerzos : selection.colaciones;
+    
+    if (itemArray) {
+      // Contar cuántas veces aparece este ítem en el array
+      return itemArray.filter((i: MenuItem) => i.id === item.id).length;
     }
-  }, [selectionsByChild, date, currentChild, item, type])
+    
+    // Comprobar en los campos individuales para retrocompatibilidad
+    const singleItem = item.type === 'almuerzo' ? selection.almuerzo : selection.colacion;
+    return singleItem?.id === item.id ? 1 : 0;
+  }
+  
+  // Actualizar la cantidad cuando cambian las selecciones
+  useEffect(() => {
+    setQuantity(getSelectedQuantity());
+  }, [item, currentChild, selectionsByChild]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -71,40 +71,35 @@ const MenuItemCard = ({
     }).format(price)
   }
 
-  const handleSelect = () => {
-    if (item.available) {
-      // Si está seleccionado, lo deseleccionamos
-      // Si no está seleccionado, lo seleccionamos
-      if (isSelected) {
-        // Eliminar una unidad de este ítem
-        removeItemFromSelection(date, item.id, type, currentChild)
-      } else {
-        // Añadir el ítem (usando la nueva función específica)
-        addItemToSelection(date, type, item, currentChild)
-      }
-    }
-  }
-
   const handleAddItem = () => {
-    if (item.available) {
-      // Añadir otra unidad del ítem usando la nueva función
-      addItemToSelection(date, type, item, currentChild)
-    }
+    if (!item.available) return;
+    
+    // Incrementar la cantidad y actualizar la selección en el store
+    setQuantity(quantity + 1);
+    addItemToSelection(item.date, item.type, item, currentChild);
   }
-
+  
   const handleRemoveItem = () => {
-    // Eliminar una unidad del ítem
-    removeItemFromSelection(date, item.id, type, currentChild)
+    if (quantity <= 0) return;
+    
+    // Si llegamos a 0, eliminamos el ítem; de lo contrario, eliminamos una unidad
+    setQuantity(quantity - 1);
+    
+    // Eliminar una unidad específica
+    removeItemFromSelection(item.date, item.id, item.type, currentChild);
   }
-
-  const isLongDescription = item.description.length > 120
+  
+  // Determinar si la descripción es larga para mostrar el botón de ver más
+  const isLongDescription = item.description && item.description.length > 120
   const shouldTruncateDescription = isLongDescription && !showFullDescription
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.05 }}
+      transition={{ duration: 0.3, delay: index * 0.1 }}
+      className="mb-4"
+      key={item.id}
     >
       <Card className={`border-0 shadow-md hover:shadow-lg transition-all duration-300 ${
         item.available
@@ -119,7 +114,7 @@ const MenuItemCard = ({
             <div className="flex-1 min-w-0">
               {/* Header con badges */}
               <div className="flex items-center gap-2 mb-3 flex-wrap">
-                <Badge className={`${
+                <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${
                   item.type === 'almuerzo' 
                     ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' 
                     : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300'
@@ -129,25 +124,21 @@ const MenuItemCard = ({
                 
                 {/* Mostrar badge de cantidad si está seleccionado */}
                 {quantity > 0 && (
-                  <Badge variant="outline" className="bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
+                  <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800">
                     <Check className="w-3 h-3 mr-1" />
                     {quantity > 1 ? `${quantity} unidades` : 'Seleccionado'}
-                  </Badge>
+                  </div>
                 )}
                 
-                <Badge variant={item.available ? "default" : "destructive"} className="text-xs">
-                  {item.available ? (
-                    <>
-                      <Check className="w-3 h-3 mr-1" />
-                      Disponible
-                    </>
-                  ) : (
-                    <>
-                      <X className="w-3 h-3 mr-1" />
-                      No disponible
-                    </>
-                  )}
-                </Badge>
+                {item.available ? (
+                  <div className="inline-flex items-center rounded-md border-0 px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-green-500 text-white">
+                    Disponible
+                  </div>
+                ) : (
+                  <div className="inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 bg-red-100 text-red-600 border-red-200">
+                    No disponible
+                  </div>
+                )}
               </div>
 
               {/* Título */}
@@ -188,24 +179,19 @@ const MenuItemCard = ({
                   </span>
                 </div>
                 
-                <Badge variant="outline" className={`text-xs ${
+                <div className={`inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-xs ${
                   userType === 'funcionario' 
                     ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-300 dark:border-emerald-800' 
                     : 'bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-300 dark:border-blue-800'
                 }`}>
                   {userType === 'funcionario' ? 'Precio funcionario' : 'Precio apoderado'}
-                </Badge>
+                </div>
               </div>
             </div>
 
             {/* Precio y controles de cantidad */}
             <div className="text-right flex-shrink-0 flex flex-col items-end">
-              <div className="flex items-center space-x-1 mb-1">
-                <DollarSign className={`w-4 h-4 ${
-                  item.available 
-                    ? 'text-slate-700 dark:text-slate-300' 
-                    : 'text-slate-400 dark:text-slate-500'
-                }`} />
+              <div className="mb-2">
                 <span className={`text-xl font-bold ${
                   item.available 
                     ? 'text-slate-900 dark:text-slate-100' 
@@ -213,9 +199,9 @@ const MenuItemCard = ({
                 }`}>
                   {formatPrice(item.price)}
                 </span>
-              </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mb-3">
-                CLP
+                <div className="text-xs text-slate-500 dark:text-slate-400">
+                  CLP
+                </div>
               </div>
               
               {/* Controles de cantidad */}
