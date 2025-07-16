@@ -568,15 +568,16 @@ export class OrderService {
    * Calcula el total del pedido
    */
   static calculateOrderTotal(selections: OrderSelectionByChild[], userType: UserType): number {
-    const prices = PRICES[userType]
     let total = 0
     
     selections.forEach(selection => {
       if (selection.almuerzo) {
-        total += prices.almuerzo
+        // Usar el precio del item si está disponible, sino usar el precio fijo
+        total += selection.almuerzo.price || PRICES[userType].almuerzo
       }
       if (selection.colacion) {
-        total += prices.colacion
+        // Usar el precio del item si está disponible, sino usar el precio fijo
+        total += selection.colacion.price || PRICES[userType].colacion
       }
     })
     
