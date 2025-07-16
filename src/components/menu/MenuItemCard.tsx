@@ -1,26 +1,26 @@
 "use client"
-import { Check, X, Info, DollarSign, MinusCircle, PlusCircle } from 'lucide-react'
+import { Check, Info, MinusCircle, PlusCircle } from 'lucide-react'
 import { MenuItem } from '@/types/menu'
 import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import type { HTMLAttributes } from 'react'
 import { Button } from '@/components/ui/button'
 import { useOrderStore } from '@/store/orderStore'
-import { Child } from '@/types/child'
+import type { Child } from '@/types/child'
 
 interface MenuItemCardProps {
   item: MenuItem
-  userType: 'apoderado' | 'funcionario'
-  index: number
+  date: string
   optionNumber: number
+  userType: 'funcionario' | 'apoderado'
+  child: Child | null
 }
 
 export function MenuItemCard({
   item,
+  date,
+  optionNumber,
   userType,
-  index,
-  optionNumber
+  child
 }: MenuItemCardProps) {
   // Estados locales
   const [showFullDescription, setShowFullDescription] = useState(false)
@@ -35,10 +35,11 @@ export function MenuItemCard({
   } = useOrderStore()
 
   // Comprobar si el ítem está seleccionado y con qué cantidad
-  const getSelectedQuantity = () => {
+  const getSelectedQuantity = (): number => {
     const selection = selectionsByChild.find(
-      (s: any) => s.date === item.date && 
-           (s.hijo?.id === currentChild?.id || (!s.hijo && !currentChild))
+      (s: {date: string; hijo?: Child | null; almuerzos?: MenuItem[]; colaciones?: MenuItem[]}) => 
+           s.date === date && 
+           (s.hijo?.id === child?.id || (!s.hijo && !child))
     )
     
     if (!selection) return 0;
@@ -59,7 +60,7 @@ export function MenuItemCard({
   // Actualizar la cantidad cuando cambian las selecciones
   useEffect(() => {
     setQuantity(getSelectedQuantity());
-  }, [item, currentChild, selectionsByChild]);
+  }, [item, child, date, selectionsByChild]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('es-CL', {
@@ -94,7 +95,6 @@ export function MenuItemCard({
   return (
     <div
       className="mb-4"
-      key={item.id}
     >
       <Card className={`border-0 shadow-md hover:shadow-lg transition-all duration-300 ${
         item.available
