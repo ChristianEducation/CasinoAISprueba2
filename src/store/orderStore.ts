@@ -253,7 +253,8 @@ export const useOrderStore = create<OrderState>()(
             subtotalAlmuerzos: 0,
             subtotalColaciones: 0,
             total: 0,
-            resumenPorHijo: {}
+            resumenPorHijo: {},
+            selections: []
           }
         }
         
