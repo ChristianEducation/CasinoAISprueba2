@@ -61,7 +61,7 @@ export default function MenuPage() {
   }
 
   // Toggle para funcionarios entre menú personal y de hijos
-  const handlePersonalToggle = (usePersonal: boolean) => {
+  const handlePersonalToggle = () => {
     // Cerrar sidebar en móvil al seleccionar
     setMobileSidebarOpen(false);
   }
