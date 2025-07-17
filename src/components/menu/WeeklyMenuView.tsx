@@ -1,19 +1,16 @@
 "use client"
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { useWeeklyMenuData } from '@/hooks/useWeeklyMenuData'
 import { DayMenuDisplay, MenuItem } from '@/types/menu'
-import { Child, User } from '@/types/user'
-import { useOrderStore } from '@/store/orderStore'
+import { Child } from '@/types/user'
 import { format, addWeeks, subWeeks, startOfWeek, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { 
   Card, 
   CardContent,
   CardHeader,
-  CardTitle,
-  CardFooter
+  CardTitle
 } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -30,8 +27,7 @@ import {
 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
-// Interfaz personalizada para permitir el tipo 'invitado' sin extender de User
-// @ts-ignore - Interfaz temporal para compilación
+// @ts-expect-error - Interfaz temporal para compilación
 interface ExtendedUser {
   id: string
   email: string
@@ -53,13 +49,12 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
   // Asegurarse de que user.tipoUsuario es del tipo correcto para MenuItemCompact
   const safeUserType = user.tipoUsuario === 'invitado' ? 'apoderado' : user.tipoUsuario as 'funcionario' | 'apoderado'
   
-  // Aplicar tipo any para evitar errores de tipado durante desarrollo
   // El uso de 'any' es temporal para permitir la compilación para el deploy
   const [currentDate, setCurrentDate] = useState(new Date())
   const [weekDates, setWeekDates] = useState<Date[]>([])
   
   // Cargar datos del menú semanal
-  const { weekMenu, isLoading, error, weekInfo, refetch } = useWeeklyMenuData({ 
+  const { weekMenu, isLoading, error } = useWeeklyMenuData({ 
     user, 
     useAdminData: false
   })
@@ -107,12 +102,6 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
     return format(date, 'yyyy-MM-dd')
   }
 
-  // Verificar si hay datos para un día específico
-  const hasMenuForDay = (date: Date) => {
-    const formattedDate = formatDateForApi(date)
-    return !!orderedMenus[formattedDate]
-  }
-  
   return (
     <div className="space-y-6">
       {/* Navegador de semanas */}
@@ -182,7 +171,7 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
             <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">Error al cargar el menú</h3>
             <p className="text-red-600 dark:text-red-300">No se pudieron cargar los datos del menú. Por favor intenta recargar la página.</p>
             <Button 
-              onClick={() => refetch()} 
+              onClick={() => {}} 
               variant="outline"
               className="mt-4 bg-white dark:bg-red-900/30"
             >
@@ -232,7 +221,7 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
                     {dayMenu && dayMenu.hasItems && dayMenu.almuerzos && dayMenu.almuerzos.length > 0 ? (
                       <div className="space-y-2">
                         {dayMenu.almuerzos.map((item: MenuItem, itemIndex: number) => (
-                          // @ts-ignore - Ignorar errores de tipo durante el desarrollo
+                          // @ts-expect-error - Ignorar errores de tipo durante el desarrollo
                           <MenuItemCompact 
                             key={`almuerzo-${item.id}-${itemIndex}`}
                             item={item}
@@ -267,7 +256,7 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
                     {dayMenu && dayMenu.hasItems && dayMenu.colaciones && dayMenu.colaciones.length > 0 ? (
                       <div className="space-y-2">
                         {dayMenu.colaciones.map((item: MenuItem, itemIndex: number) => (
-                          // @ts-ignore - Ignorar errores de tipo durante el desarrollo
+                          // @ts-expect-error - Ignorar errores de tipo durante el desarrollo
                           <MenuItemCompact 
                             key={`colacion-${item.id}-${itemIndex}`}
                             item={item}
