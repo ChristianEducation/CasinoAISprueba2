@@ -466,15 +466,8 @@ export const useOrderStore = create<OrderState>()(
           const fieldArray = `${field}s` as 'almuerzos' | 'colaciones';
           
           if (currentSelection[fieldArray]) {
-            // Verificar si el ítem ya existe para evitar duplicados
-            const existingItemIndex = currentSelection[fieldArray]!.findIndex(i => i.id === item.id);
-            if (existingItemIndex >= 0) {
-              // El ítem ya existe, no lo añadimos de nuevo
-              console.log(`⚠️ El ${field} con ID: ${item.id} ya está en la selección`);
-              return;
-            }
-            
-            // Añadir el ítem al array existente
+            // Permitir duplicados para representar múltiples cantidades
+            // Simplemente añadimos el ítem al array sin verificar duplicados
             currentSelection[fieldArray] = [...currentSelection[fieldArray]!, item];
           } else {
             // Crear un nuevo array con el ítem
