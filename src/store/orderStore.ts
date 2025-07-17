@@ -507,9 +507,15 @@ export const useOrderStore = create<OrderState>()(
             hijo: child
           };
           
-          newSelection[field] = item;
+          // Usar la misma lógica que en la actualización:
+          // Crear arrays siempre, pero el campo individual solo si no existe
           const fieldArray = `${field}s` as 'almuerzos' | 'colaciones';
           newSelection[fieldArray] = [item];
+          
+          // Solo establecer el campo individual si no existe (por consistencia)
+          if (!newSelection[field]) {
+            newSelection[field] = item;
+          }
           
           set({ selectionsByChild: [...selectionsByChild, newSelection] });
           console.log(`✅ Se creó una nueva selección para ${date} con ${field} ID: ${item.id}`);
