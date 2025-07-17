@@ -22,6 +22,17 @@ import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useOrderStore } from '@/store/orderStore'
 
+interface ExtendedUser {
+  id: string
+  email: string
+  tipoUsuario: string
+  userType: string
+  firstName: string
+  lastName: string
+  isActive: boolean
+  createdAt: Date
+}
+
 export default function MenuPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuth()
@@ -29,8 +40,6 @@ export default function MenuPage() {
   const { menuPublished, publishMenu, hideMenu, loading: loadingMenu } = useOrderManagement()
   // El estado de pedido y sus utilidades
   const { currentChild, setCurrentChild, children, loading: loadingChildren } = useOrderStore()
-  // Estado para el toggle de menú personal (funcionarios)
-  const [usePersonalMenu, setUsePersonalMenu] = useState(false)
   // Estado para controlar sidebar en móvil
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   // Estado para el procesamiento de pagos
@@ -41,30 +50,18 @@ export default function MenuPage() {
     if (!user && !authLoading) {
       router.push('/login')
     }
-    
-    // Si es funcionario, activar el menú personal por defecto
-    if (user?.tipo === 'funcionario') {
-      setUsePersonalMenu(true)
-    }
   }, [user, authLoading, router])
 
   // Manejo de selección de niño
   const handleChildSelect = (childId: string | null) => {
     const child = children.find((c: { id: string }) => c.id === childId) || null;
     setCurrentChild(child);
-    if (childId) {
-      setUsePersonalMenu(false);
-    }
     // Cerrar sidebar en móvil al seleccionar
     setMobileSidebarOpen(false);
   }
 
   // Toggle para funcionarios entre menú personal y de hijos
   const handlePersonalToggle = (usePersonal: boolean) => {
-    setUsePersonalMenu(usePersonal);
-    if (usePersonal) {
-      setCurrentChild(null);
-    }
     // Cerrar sidebar en móvil al seleccionar
     setMobileSidebarOpen(false);
   }
@@ -151,11 +148,14 @@ export default function MenuPage() {
                       <ChildSelector 
                         user={user}
                         isReadOnly={false}
+                        onChildSelect={handleChildSelect}
                       />
                     ) : user?.tipoUsuario === 'funcionario' && user ? (
                       <FunctionaryChildSelector 
                         user={user}
                         isReadOnly={false}
+                        onChildSelect={handleChildSelect}
+                        onPersonalToggle={handlePersonalToggle}
                       />
                     ) : null}
                   </CardContent>
@@ -173,7 +173,7 @@ export default function MenuPage() {
                         lastName: '',
                         isActive: true,
                         createdAt: new Date()
-                      }} as any
+                      } as ExtendedUser} 
                       onProceedToPayment={handleProceedToPayment}
                       isProcessingPayment={isProcessingPayment}
                     />
@@ -214,7 +214,7 @@ export default function MenuPage() {
                   lastName: '',
                   isActive: true,
                   createdAt: new Date()
-                } as any}
+                } as ExtendedUser}
                 currentChild={currentChild}
               />
             )}
