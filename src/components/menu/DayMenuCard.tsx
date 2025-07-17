@@ -6,6 +6,7 @@ import { DayMenuDisplay } from '@/types/menu'
 import { MenuItemCard } from './MenuItemCard'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { useOrderStore } from '@/store/orderStore'
 
 interface DayMenuCardProps {
   dayMenu: DayMenuDisplay
@@ -14,6 +15,9 @@ interface DayMenuCardProps {
 }
 
 export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
+  // Obtener el niño seleccionado actualmente del store
+  const { currentChild } = useOrderStore()
+
   const isToday = () => {
     const today = new Date().toISOString().split('T')[0]
     return dayMenu.date === today
@@ -149,7 +153,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
                     item={item}
                     userType={userType}
                     date={dayMenu.date}
-                    child={null}
+                    child={currentChild}
                     optionNumber={itemIndex + 1}
                   />
                 ))}
@@ -191,7 +195,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
                     item={item}
                     userType={userType}
                     date={dayMenu.date}
-                    child={null}
+                    child={currentChild}
                     optionNumber={itemIndex + 1}
                   />
                 ))}
