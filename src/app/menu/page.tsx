@@ -35,11 +35,11 @@ interface ExtendedUser {
 
 export default function MenuPage() {
   const router = useRouter()
-  const { user, loading: authLoading } = useAuth()
+  const { user, isLoading: authLoading } = useAuth()
   // Extraemos lo que necesitamos del hook de orden y manejo de menú
   const { menuPublished, publishMenu, hideMenu, loading: loadingMenu } = useOrderManagement()
   // El estado de pedido y sus utilidades
-  const { currentChild, setCurrentChild, children, loading: loadingChildren } = useOrderStore()
+  const { currentChild, setCurrentChild, children, isLoading: loadingChildren } = useOrderStore()
   // Estado para controlar sidebar en móvil
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   // Estado para el procesamiento de pagos
