@@ -241,12 +241,14 @@ export const useOrderStore = create<OrderState>()(
           set({ selectionsByChild: updated })
         } else if (item) {
           // Solo crear nueva selección si hay un item
+          const fieldArray = `${field}s` as 'almuerzos' | 'colaciones'
           const newSelection: OrderSelectionByChild = {
             date,
             dia: '', // Se llenará desde el componente
             fecha: date,
             hijo: child, // null para funcionarios
-            [field]: item
+            [field]: item,
+            [fieldArray]: [item] // Inicializar el array con el primer ítem
           }
           set({ selectionsByChild: [...selectionsByChild, newSelection] })
         }
