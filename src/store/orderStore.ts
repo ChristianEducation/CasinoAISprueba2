@@ -209,8 +209,21 @@ export const useOrderStore = create<OrderState>()(
           const currentSelection = {...updated[existingIndex]}
           
           if (item) {
-            // Agregar o actualizar el campo
-            updated[existingIndex] = { ...currentSelection, [field]: item }
+            // Actualizar el campo individual para mantener compatibilidad
+            currentSelection[field] = item
+            
+            // Actualizar también el array correspondiente
+            const fieldArray = `${field}s` as 'almuerzos' | 'colaciones'
+            
+            if (currentSelection[fieldArray]) {
+              // Agregar el ítem al array existente
+              currentSelection[fieldArray] = [...currentSelection[fieldArray]!, item]
+            } else {
+              // Crear un nuevo array con el ítem
+              currentSelection[fieldArray] = [item]
+            }
+            
+            updated[existingIndex] = currentSelection
           } else {
             // Remover el campo específico
             const newSelection = { ...currentSelection }
