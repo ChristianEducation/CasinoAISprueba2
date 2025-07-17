@@ -489,8 +489,11 @@ export const useOrderStore = create<OrderState>()(
             currentSelection[fieldArray] = [item];
           }
           
-          // Mantener el campo individual para compatibilidad
-          currentSelection[field] = item;
+          // Mantener el campo individual para compatibilidad SOLO si no existe
+          // Si ya existe un valor, no lo sobrescribimos para permitir selecciones múltiples
+          if (!currentSelection[field]) {
+            currentSelection[field] = item;
+          }
           
           updated[existingIndex] = currentSelection;
           set({ selectionsByChild: updated });
