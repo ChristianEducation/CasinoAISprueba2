@@ -94,7 +94,7 @@ export default function MenuPage() {
       
       <div className="container px-4 py-4 md:py-8 max-w-screen-xl mx-auto">
         {/* Alerta para administradores sobre estado de publicación del menú */}
-        {(user as ExtendedUser)?.role === 'admin' && (
+        {(user as unknown as { role?: string })?.role === 'admin' && (
           <Alert className="mb-6">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
@@ -148,13 +148,13 @@ export default function MenuPage() {
                     
                     {loadingChildren ? (
                       <p>Cargando...</p>
-                    ) : (user as ExtendedUser)?.tipoUsuario === 'apoderado' && user ? (
+                    ) : user?.tipoUsuario === 'apoderado' && user ? (
                       <ChildSelector 
                         user={user}
                         isReadOnly={false}
                         onChildSelect={handleChildSelect}
                       />
-                    ) : (user as ExtendedUser)?.tipoUsuario === 'funcionario' && user ? (
+                    ) : user?.tipoUsuario === 'funcionario' && user ? (
                       <FunctionaryChildSelector 
                         user={user}
                         isReadOnly={false}
@@ -168,17 +168,7 @@ export default function MenuPage() {
                 <Card>
                   <CardContent className="p-4">
                     <OrderSummary 
-                      user={user || { 
-                        id: '0', 
-                        email: '', 
-                        tipoUsuario: 'invitado', 
-                        userType: 'apoderado',
-                        firstName: '', 
-                        lastName: '',
-                        isActive: true,
-                        createdAt: new Date(),
-                        role: 'invitado'
-                      } as ExtendedUser} 
+                      user={user} 
                       onProceedToPayment={handleProceedToPayment}
                       isProcessingPayment={isProcessingPayment}
                     />
@@ -199,7 +189,7 @@ export default function MenuPage() {
           
           {/* Menú semanal */}
           <div className="flex-grow">
-            {(user as ExtendedUser)?.role === 'admin' && (
+            {(user as unknown as { role?: string })?.role === 'admin' && (
               <div className="mb-4">
                 <h1 className="text-2xl font-bold">Gestión de Menú</h1>
               </div>
@@ -210,17 +200,7 @@ export default function MenuPage() {
               <MenuSkeleton />
             ) : (
               <WeeklyMenuView 
-                user={user || { 
-                  id: '0', 
-                  email: '', 
-                  tipoUsuario: 'invitado',
-                  userType: 'apoderado',
-                  firstName: '', 
-                  lastName: '',
-                  isActive: true,
-                  createdAt: new Date(),
-                  role: 'invitado'
-                } as ExtendedUser}
+                user={user} 
                 currentChild={currentChild}
               />
             )}
