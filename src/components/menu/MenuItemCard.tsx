@@ -29,7 +29,6 @@ export function MenuItemCard({
   // Acceder a orderStore para manejar selecciones
   const { 
     selectionsByChild, 
-    currentChild, 
     removeItemFromSelection,
     addItemToSelection 
   } = useOrderStore()
