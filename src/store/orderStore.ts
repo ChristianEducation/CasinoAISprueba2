@@ -217,7 +217,8 @@ export const useOrderStore = create<OrderState>()(
             delete newSelection[field]
             
             // Si no quedan almuerzo ni colacion, eliminar toda la selección
-            if (!newSelection.almuerzo && !newSelection.colacion) {
+            if (!newSelection.almuerzo && !newSelection.colacion && 
+                (!newSelection.almuerzos?.length) && (!newSelection.colaciones?.length)) {
               updated.splice(existingIndex, 1)
             } else {
               updated[existingIndex] = newSelection
@@ -240,28 +241,13 @@ export const useOrderStore = create<OrderState>()(
 
       clearSelectionsByChild: () => set({ selectionsByChild: [] }),
 
-      getOrderSummaryByChild: (): OrderSummaryByChild => {
-        const { selectionsByChild, userType } = get()
+      getOrderSummaryByChild: () => {
+        const { selectionsByChild, currentChild } = get()
         
-        // Verificar que PRICES esté definido
-        if (!PRICES || !PRICES[userType]) {
-          console.error('PRICES not defined or missing userType:', userType)
+        // Si no hay selecciones, retornar un objeto vacío
+        if (selectionsByChild.length === 0) {
           return {
-            selections: selectionsByChild,
-            totalAlmuerzos: 0,
-            totalColaciones: 0,
-            subtotalAlmuerzos: 0,
-            subtotalColaciones: 0,
-            total: 0,
-            resumenPorHijo: {}
-          }
-        }
-
-        const prices = PRICES[userType]
-        if (!prices || typeof prices.almuerzo !== 'number' || typeof prices.colacion !== 'number') {
-          console.error('Invalid price structure for userType:', userType, prices)
-          return {
-            selections: selectionsByChild,
+            totalItems: 0,
             totalAlmuerzos: 0,
             totalColaciones: 0,
             subtotalAlmuerzos: 0,
@@ -293,32 +279,64 @@ export const useOrderStore = create<OrderState>()(
             }
           }
           
-          if (selection.almuerzo) {
-            totalAlmuerzos++
-            resumenPorHijo[hijoId].almuerzos++
-            resumenPorHijo[hijoId].subtotal += selection.almuerzo.price
+          // Calcular basado en arrays de selecciones múltiples
+          if (selection.almuerzos && selection.almuerzos.length > 0) {
+            const cantidadAlmuerzos = selection.almuerzos.length;
+            totalAlmuerzos += cantidadAlmuerzos;
+            resumenPorHijo[hijoId].almuerzos += cantidadAlmuerzos;
+            
+            // Sumar los precios de todos los almuerzos
+            const subtotalAlmuerzosHijo = selection.almuerzos.reduce((sum, item) => sum + item.price, 0);
+            resumenPorHijo[hijoId].subtotal += subtotalAlmuerzosHijo;
+          } 
+          // Mantener compatibilidad con el campo individual
+          else if (selection.almuerzo) {
+            totalAlmuerzos++;
+            resumenPorHijo[hijoId].almuerzos++;
+            resumenPorHijo[hijoId].subtotal += selection.almuerzo.price;
           }
           
-          if (selection.colacion) {
-            totalColaciones++
-            resumenPorHijo[hijoId].colaciones++
-            resumenPorHijo[hijoId].subtotal += selection.colacion.price
+          // Igual para colaciones
+          if (selection.colaciones && selection.colaciones.length > 0) {
+            const cantidadColaciones = selection.colaciones.length;
+            totalColaciones += cantidadColaciones;
+            resumenPorHijo[hijoId].colaciones += cantidadColaciones;
+            
+            // Sumar los precios de todas las colaciones
+            const subtotalColacionesHijo = selection.colaciones.reduce((sum, item) => sum + item.price, 0);
+            resumenPorHijo[hijoId].subtotal += subtotalColacionesHijo;
+          }
+          // Mantener compatibilidad con el campo individual
+          else if (selection.colacion) {
+            totalColaciones++;
+            resumenPorHijo[hijoId].colaciones++;
+            resumenPorHijo[hijoId].subtotal += selection.colacion.price;
           }
         })
         
-        // Calcular totales usando los precios reales de los items
-        const subtotalAlmuerzos = selectionsByChild
-          .filter(s => s.almuerzo)
-          .reduce((sum, s) => sum + (s.almuerzo?.price || 0), 0)
+        // Calcular totales usando los precios reales de los items desde los arrays
+        const subtotalAlmuerzos = selectionsByChild.reduce((sum, selection) => {
+          if (selection.almuerzos && selection.almuerzos.length > 0) {
+            return sum + selection.almuerzos.reduce((itemSum, item) => itemSum + item.price, 0);
+          } else if (selection.almuerzo) {
+            return sum + selection.almuerzo.price;
+          }
+          return sum;
+        }, 0);
         
-        const subtotalColaciones = selectionsByChild
-          .filter(s => s.colacion)
-          .reduce((sum, s) => sum + (s.colacion?.price || 0), 0)
+        const subtotalColaciones = selectionsByChild.reduce((sum, selection) => {
+          if (selection.colaciones && selection.colaciones.length > 0) {
+            return sum + selection.colaciones.reduce((itemSum, item) => itemSum + item.price, 0);
+          } else if (selection.colacion) {
+            return sum + selection.colacion.price;
+          }
+          return sum;
+        }, 0);
         
         const total = subtotalAlmuerzos + subtotalColaciones
         
         return {
-          selections: selectionsByChild,
+          totalItems: totalAlmuerzos + totalColaciones,
           totalAlmuerzos,
           totalColaciones,
           subtotalAlmuerzos,
