@@ -32,6 +32,7 @@ interface ExtendedUser {
   lastName: string
   isActive: boolean
   createdAt: Date
+  role?: 'funcionario' | 'apoderado' | 'admin' | 'super_admin'
 }
 
 export default function MenuPage() {
@@ -93,7 +94,7 @@ export default function MenuPage() {
       
       <div className="container px-4 py-4 md:py-8 max-w-screen-xl mx-auto">
         {/* Alerta para administradores sobre estado de publicación del menú */}
-        {(user as any)?.role === 'admin' && (
+        {(user as ExtendedUser)?.role === 'admin' && (
           <Alert className="mb-6">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
@@ -147,13 +148,13 @@ export default function MenuPage() {
                     
                     {loadingChildren ? (
                       <p>Cargando...</p>
-                    ) : user?.tipoUsuario === 'apoderado' && user ? (
+                    ) : (user as ExtendedUser)?.tipoUsuario === 'apoderado' && user ? (
                       <ChildSelector 
                         user={user}
                         isReadOnly={false}
                         onChildSelect={handleChildSelect}
                       />
-                    ) : user?.tipoUsuario === 'funcionario' && user ? (
+                    ) : (user as ExtendedUser)?.tipoUsuario === 'funcionario' && user ? (
                       <FunctionaryChildSelector 
                         user={user}
                         isReadOnly={false}
@@ -175,7 +176,8 @@ export default function MenuPage() {
                         firstName: '', 
                         lastName: '',
                         isActive: true,
-                        createdAt: new Date()
+                        createdAt: new Date(),
+                        role: 'invitado'
                       } as ExtendedUser} 
                       onProceedToPayment={handleProceedToPayment}
                       isProcessingPayment={isProcessingPayment}
@@ -197,7 +199,7 @@ export default function MenuPage() {
           
           {/* Menú semanal */}
           <div className="flex-grow">
-            {user?.tipo === 'admin' && (
+            {(user as ExtendedUser)?.role === 'admin' && (
               <div className="mb-4">
                 <h1 className="text-2xl font-bold">Gestión de Menú</h1>
               </div>
@@ -216,7 +218,8 @@ export default function MenuPage() {
                   firstName: '', 
                   lastName: '',
                   isActive: true,
-                  createdAt: new Date()
+                  createdAt: new Date(),
+                  role: 'invitado'
                 } as ExtendedUser}
                 currentChild={currentChild}
               />
