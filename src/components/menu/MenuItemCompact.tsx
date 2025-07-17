@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { MinusCircle, PlusCircle, Info } from 'lucide-react'
+import { MinusCircle, PlusCircle } from 'lucide-react'
 import { useOrderStore } from '@/store/orderStore'
 import { MenuItem } from '@/types/menu'
 import { Child } from '@/types/user'
@@ -63,11 +63,14 @@ export function MenuItemCompact({
   }, [item, child, date, selectionsByChild]);
 
   const formatPrice = (price: number) => {
+    // Aplicar descuento según el tipo de usuario
+    const finalPrice = userType === 'funcionario' ? price * 0.9 : price;
+    
     return new Intl.NumberFormat('es-CL', {
       style: 'currency',
       currency: 'CLP',
       minimumFractionDigits: 0
-    }).format(price)
+    }).format(finalPrice)
   }
 
   const handleAddItem = () => {
