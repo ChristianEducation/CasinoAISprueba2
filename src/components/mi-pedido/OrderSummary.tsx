@@ -172,7 +172,32 @@ export function OrderSummary({ user, onProceedToPayment, isProcessingPayment }: 
                               </Button>
                             </div>
                             
-                            {selection.almuerzo && (
+                            {/* Mostrar almuerzos - primero revisar array de múltiples selecciones */}
+                            {selection.almuerzos && selection.almuerzos.length > 0 ? (
+                              <>
+                                {selection.almuerzos.map((almuerzo, idx) => (
+                                  <div key={`${almuerzo.id}-${idx}`} className="flex items-center justify-between text-sm gap-2">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <Utensils className="w-3 h-3 text-slate-500 flex-shrink-0" />
+                                      <span className="text-slate-600 dark:text-slate-400 truncate">
+                                        {almuerzo.name}
+                                      </span>
+                                      {selection.almuerzos && selection.almuerzos.filter(a => a.id === almuerzo.id).length > 1 && idx === selection.almuerzos.findIndex(a => a.id === almuerzo.id) && (
+                                        <Badge 
+                                          variant="outline" 
+                                          className="bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300"
+                                        >
+                                          x{selection.almuerzos.filter(a => a.id === almuerzo.id).length}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <span className="text-slate-900 dark:text-slate-100 font-medium flex-shrink-0">
+                                      {formatPrice(almuerzo.price)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </>
+                            ) : selection.almuerzo && (
                               <div className="flex items-center justify-between text-sm gap-2">
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   <Utensils className="w-3 h-3 text-slate-500 flex-shrink-0" />
@@ -186,7 +211,32 @@ export function OrderSummary({ user, onProceedToPayment, isProcessingPayment }: 
                               </div>
                             )}
                             
-                            {selection.colacion && (
+                            {/* Mostrar colaciones - primero revisar array de múltiples selecciones */}
+                            {selection.colaciones && selection.colaciones.length > 0 ? (
+                              <>
+                                {selection.colaciones.map((colacion, idx) => (
+                                  <div key={`${colacion.id}-${idx}`} className="flex items-center justify-between text-sm gap-2">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                      <Coffee className="w-3 h-3 text-slate-500 flex-shrink-0" />
+                                      <span className="text-slate-600 dark:text-slate-400 truncate">
+                                        {colacion.name}
+                                      </span>
+                                      {selection.colaciones && selection.colaciones.filter(c => c.id === colacion.id).length > 1 && idx === selection.colaciones.findIndex(c => c.id === colacion.id) && (
+                                        <Badge 
+                                          variant="outline" 
+                                          className="bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/30 dark:border-emerald-800 dark:text-emerald-300"
+                                        >
+                                          x{selection.colaciones.filter(c => c.id === colacion.id).length}
+                                        </Badge>
+                                      )}
+                                    </div>
+                                    <span className="text-slate-900 dark:text-slate-100 font-medium flex-shrink-0">
+                                      {formatPrice(colacion.price)}
+                                    </span>
+                                  </div>
+                                ))}
+                              </>
+                            ) : selection.colacion && (
                               <div className="flex items-center justify-between text-sm gap-2">
                                 <div className="flex items-center gap-2 flex-1 min-w-0">
                                   <Coffee className="w-3 h-3 text-slate-500 flex-shrink-0" />
