@@ -13,13 +13,19 @@ import {
   X,
   ChevronRight,
   Utensils,
-  Coffee
+  Coffee,
+  CreditCard
 } from 'lucide-react'
 import useAuth from '@/hooks/useAuth'
 import { useWeeklyMenuData } from '@/hooks/useWeeklyMenuData'
+import { useOrderStore } from '@/store/orderStore'
+import { useOrderManagement } from '@/hooks/useOrderManagement'
 import { Navbar } from '@/components/panel/Navbar'
 import { DayMenuCard } from '@/components/menu/DayMenuCard'
 import { MenuSkeleton } from '@/components/menu/MenuSkeleton'
+import { ChildSelector } from '@/components/mi-pedido/ChildSelector'
+import { FunctionaryChildSelector } from '@/components/mi-pedido/FunctionaryChildSelector'
+import { OrderSummary } from '@/components/mi-pedido/OrderSummary'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Badge } from '@/components/ui/badge'
@@ -39,6 +45,9 @@ export default function MenuPage() {
     user, 
     useAdminData: false
   })
+  
+  // Hooks de gestión de pedidos
+  const { isProcessingPayment, processPayment } = useOrderManagement()
 
   const [selectedDayIndex, setSelectedDayIndex] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -107,9 +116,9 @@ export default function MenuPage() {
       <Navbar onLogout={handleLogout} />
 
       <div className="flex h-[calc(100vh-4rem)]">
-        {/* Sidebar */}
+        {/* Sidebar - Días de la semana */}
         <div className={cn(
-          "fixed inset-y-0 left-0 z-50 w-80 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
+          "fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <div className="flex flex-col h-full">
@@ -325,80 +334,151 @@ export default function MenuPage() {
             </div>
           </div>
 
-          {/* Contenido del día seleccionado */}
-          <div className="flex-1 overflow-y-auto p-6">
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.div
-                  key="loading"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
+        </div>
+
+        {/* Contenedor principal con grid */}
+        <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            {/* Botón de menú móvil */}
+            <div className="lg:hidden flex justify-between items-center mb-4 col-span-full">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setSidebarOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <MenuIcon className="w-4 h-4" />
+                Ver días
+              </Button>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={refetch}
+                  disabled={isLoading}
                 >
-                  <MenuSkeleton />
-                </motion.div>
-              ) : error ? (
-                <motion.div
-                  key="error"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
+                  <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push('/panel')}
                 >
-                  <Alert variant="destructive" className="max-w-2xl mx-auto">
-                    <AlertTriangle className="h-4 w-4" />
-                    <AlertDescription className="flex items-center justify-between">
-                      <span>{error}</span>
-                      <Button variant="outline" size="sm" onClick={refetch} className="ml-4">
-                        <RefreshCw className="w-4 h-4 mr-2" />
-                        Reintentar
-                      </Button>
-                    </AlertDescription>
-                  </Alert>
-                </motion.div>
-              ) : weekMenu.length === 0 ? (
-                <motion.div
-                  key="empty"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="max-w-2xl mx-auto"
+                  Volver al Panel
+                </Button>
+              </div>
+            </div>
+
+            {/* Contenido central - Menú del día */}
+            <div className="lg:col-span-3">
+              <div className="hidden lg:flex justify-end space-x-2 mb-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={refetch}
+                  disabled={isLoading}
                 >
-                  <Card className="shadow-soft-lg border-0 bg-white dark:bg-slate-800">
-                    <CardContent className="p-12 text-center">
-                      <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-800/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                        <CalendarX className="w-10 h-10 text-amber-600 dark:text-amber-400" />
-                      </div>
-                      <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 mb-3">
-                        Menú no disponible
-                      </h2>
-                      <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed mb-8">
-                        El menú para esta semana aún no ha sido publicado.
-                        Por favor, vuelve a consultar más tarde.
-                      </p>
-                      <Button onClick={refetch} className="flex items-center space-x-2 px-6 py-3">
-                        <RefreshCw size={18} />
-                        <span>Verificar</span>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ) : selectedDay ? (
-                <motion.div
-                  key={`day-${selectedDayIndex}`}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className="max-w-4xl mx-auto"
+                  <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => router.push('/panel')}
                 >
-                  <DayMenuCard
-                    dayMenu={selectedDay}
-                    userType={user.tipoUsuario}
-                    index={selectedDayIndex}
-                  />
-                </motion.div>
-              ) : null}
-            </AnimatePresence>
+                  Volver al Panel
+                </Button>
+              </div>
+
+              <AnimatePresence mode="wait">
+                {isLoading ? (
+                  <motion.div
+                    key="loading"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <MenuSkeleton />
+                  </motion.div>
+                ) : error ? (
+                  <motion.div
+                    key="error"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                  >
+                    <Alert variant="destructive" className="max-w-2xl mx-auto">
+                      <AlertTriangle className="h-4 w-4" />
+                      <AlertDescription className="flex items-center justify-between">
+                        <span>{error}</span>
+                        <Button variant="outline" size="sm" onClick={refetch} className="ml-4">
+                          <RefreshCw className="w-4 h-4 mr-2" />
+                          Reintentar
+                        </Button>
+                      </AlertDescription>
+                    </Alert>
+                  </motion.div>
+                ) : weekMenu.length === 0 ? (
+                  <motion.div
+                    key="empty"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    className="max-w-2xl mx-auto"
+                  >
+                    <Card className="shadow-soft-lg border-0 bg-white dark:bg-slate-800">
+                      <CardContent className="p-12 text-center">
+                        <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-800/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                          <CalendarX className="w-10 h-10 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 mb-3">
+                          Menú no disponible
+                        </h2>
+                        <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed mb-8">
+                          El menú para esta semana aún no ha sido publicado.
+                          Por favor, vuelve a consultar más tarde.
+                        </p>
+                        <Button onClick={refetch} className="flex items-center space-x-2 px-6 py-3">
+                          <RefreshCw size={18} />
+                          <span>Verificar</span>
+                        </Button>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ) : selectedDay ? (
+                  <motion.div
+                    key={`day-${selectedDayIndex}`}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    className="max-w-4xl mx-auto"
+                  >
+                    <DayMenuCard
+                      dayMenu={selectedDay}
+                      userType={user.tipoUsuario}
+                      index={selectedDayIndex}
+                    />
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+            </div>
+
+            {/* Sidebar derecha - Selector de hijos y resumen del pedido */}
+            <div className="lg:col-span-1 space-y-6">
+              {/* Selector de hijos según tipo de usuario */}
+              {user.tipoUsuario === 'apoderado' ? (
+                <ChildSelector user={user} isReadOnly={false} />
+              ) : (
+                <FunctionaryChildSelector user={user} isReadOnly={false} />
+              )}
+
+              {/* Resumen del pedido */}
+              <OrderSummary 
+                user={user}
+                onProceedToPayment={processPayment}
+                isProcessingPayment={isProcessingPayment}
+              />
+            </div>
           </div>
         </div>
       </div>
