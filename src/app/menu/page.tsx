@@ -10,6 +10,7 @@ import {
 } from 'lucide-react'
 import useAuth from '@/hooks/useAuth'
 import { useOrderManagement } from '@/hooks/useOrderManagement'
+import { useMenuAdmin } from '@/hooks/useMenuAdmin'
 import { Navbar } from '@/components/panel/Navbar'
 import { MenuSkeleton } from '@/components/menu/MenuSkeleton'
 import { ChildSelector } from '@/components/mi-pedido/ChildSelector'
@@ -37,7 +38,9 @@ export default function MenuPage() {
   const router = useRouter()
   const { user, isLoading: authLoading } = useAuth()
   // Extraemos lo que necesitamos del hook de orden y manejo de menú
-  const { menuPublished, publishMenu, hideMenu, loading: loadingMenu } = useOrderManagement()
+  const { isLoadingMenu: loadingMenu } = useOrderManagement()
+  // Extraemos funcionalidad de admin para publicación de menú
+  const { menuPublished, publishMenu, hideMenu } = useMenuAdmin()
   // El estado de pedido y sus utilidades
   const { currentChild, setCurrentChild, children, isLoading: loadingChildren } = useOrderStore()
   // Estado para controlar sidebar en móvil
