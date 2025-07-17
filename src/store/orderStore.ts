@@ -242,7 +242,7 @@ export const useOrderStore = create<OrderState>()(
       clearSelectionsByChild: () => set({ selectionsByChild: [] }),
 
       getOrderSummaryByChild: () => {
-        const { selectionsByChild, currentChild } = get()
+        const { selectionsByChild } = get()
         
         // Si no hay selecciones, retornar un objeto vacío
         if (selectionsByChild.length === 0) {
