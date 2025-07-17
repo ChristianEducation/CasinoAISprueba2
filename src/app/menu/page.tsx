@@ -13,12 +13,10 @@ import {
   X,
   ChevronRight,
   Utensils,
-  Coffee,
-  CreditCard
+  Coffee
 } from 'lucide-react'
 import useAuth from '@/hooks/useAuth'
 import { useWeeklyMenuData } from '@/hooks/useWeeklyMenuData'
-import { useOrderStore } from '@/store/orderStore'
 import { useOrderManagement } from '@/hooks/useOrderManagement'
 import { Navbar } from '@/components/panel/Navbar'
 import { DayMenuCard } from '@/components/menu/DayMenuCard'
