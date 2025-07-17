@@ -75,7 +75,9 @@ export function MenuItemCard({
     
     // Incrementar la cantidad y actualizar la selección en el store
     setQuantity(quantity + 1);
-    addItemToSelection(item.date, item.type, item, currentChild);
+    
+    // Siempre añadir el ítem, permitiendo duplicados para representar múltiples cantidades
+    addItemToSelection(item.date, item.type, item, child);
   }
   
   const handleRemoveItem = () => {
@@ -85,7 +87,7 @@ export function MenuItemCard({
     setQuantity(quantity - 1);
     
     // Eliminar una unidad específica
-    removeItemFromSelection(item.date, item.id, item.type, currentChild);
+    removeItemFromSelection(item.date, item.id, item.type, child);
   }
   
   // Determinar si la descripción es larga para mostrar el botón de ver más
