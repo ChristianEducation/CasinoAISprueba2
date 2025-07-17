@@ -93,7 +93,7 @@ export default function MenuPage() {
       
       <div className="container px-4 py-4 md:py-8 max-w-screen-xl mx-auto">
         {/* Alerta para administradores sobre estado de publicación del menú */}
-        {user?.tipo === 'admin' && (
+        {(user as any)?.role === 'admin' && (
           <Alert className="mb-6">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
