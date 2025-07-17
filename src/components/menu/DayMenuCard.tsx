@@ -145,6 +145,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
               <div className="grid gap-4">
                 {dayMenu.almuerzos.map((item, itemIndex) => (
                   <MenuItemCard
+                    key={`almuerzo-${item.id}-${itemIndex}`}
                     item={item}
                     userType={userType}
                     date={dayMenu.date}
@@ -186,6 +187,7 @@ export function DayMenuCard({ dayMenu, userType }: DayMenuCardProps) {
               <div className="grid gap-4">
                 {dayMenu.colaciones.map((item, itemIndex) => (
                   <MenuItemCard
+                    key={`colacion-${item.id}-${itemIndex}`}
                     item={item}
                     userType={userType}
                     date={dayMenu.date}
