@@ -426,6 +426,63 @@ export const useOrderStore = create<OrderState>()(
           set({ selectionsByChild: updated });
           console.log(`🗑️ Se eliminó una unidad de ${itemType} con ID: ${itemId}`);
         }
+      },
+
+      addItemToSelection: (
+        date: string,
+        field: 'almuerzo' | 'colacion',
+        item: MenuItem,
+        child: Child | null
+      ) => {
+        const { selectionsByChild } = get();
+        const existingIndex = selectionsByChild.findIndex(
+          s => s.date === date && 
+               (s.hijo?.id === child?.id || (!s.hijo && !child))
+        );
+        
+        if (existingIndex >= 0) {
+          const updated = [...selectionsByChild];
+          const currentSelection = {...updated[existingIndex]};
+          const fieldArray = `${field}s` as 'almuerzos' | 'colaciones';
+          
+          if (currentSelection[fieldArray]) {
+            // Verificar si el ítem ya existe para evitar duplicados
+            const existingItemIndex = currentSelection[fieldArray]!.findIndex(i => i.id === item.id);
+            if (existingItemIndex >= 0) {
+              // El ítem ya existe, no lo añadimos de nuevo
+              console.log(`⚠️ El ${field} con ID: ${item.id} ya está en la selección`);
+              return;
+            }
+            
+            // Añadir el ítem al array existente
+            currentSelection[fieldArray] = [...currentSelection[fieldArray]!, item];
+          } else {
+            // Crear un nuevo array con el ítem
+            currentSelection[fieldArray] = [item];
+          }
+          
+          // Mantener el campo individual para compatibilidad
+          currentSelection[field] = item;
+          
+          updated[existingIndex] = currentSelection;
+          set({ selectionsByChild: updated });
+          console.log(`✅ Se añadió un ${field} con ID: ${item.id}`);
+        } else {
+          // Crear una nueva selección
+          const newSelection: OrderSelectionByChild = {
+            date,
+            dia: '',
+            fecha: date,
+            hijo: child
+          };
+          
+          newSelection[field] = item;
+          const fieldArray = `${field}s` as 'almuerzos' | 'colaciones';
+          newSelection[fieldArray] = [item];
+          
+          set({ selectionsByChild: [...selectionsByChild, newSelection] });
+          console.log(`✅ Se creó una nueva selección para ${date} con ${field} ID: ${item.id}`);
+        }
       }
     }),
     {
