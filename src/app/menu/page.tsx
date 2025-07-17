@@ -5,477 +5,219 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   AlertTriangle, 
-  RefreshCw, 
-  CheckCircle, 
-  Zap, 
-  CalendarX,
   Menu as MenuIcon,
-  X,
-  ChevronRight,
-  Utensils,
-  Coffee
+  X
 } from 'lucide-react'
 import useAuth from '@/hooks/useAuth'
-import { useWeeklyMenuData } from '@/hooks/useWeeklyMenuData'
 import { useOrderManagement } from '@/hooks/useOrderManagement'
 import { Navbar } from '@/components/panel/Navbar'
-import { DayMenuCard } from '@/components/menu/DayMenuCard'
 import { MenuSkeleton } from '@/components/menu/MenuSkeleton'
 import { ChildSelector } from '@/components/mi-pedido/ChildSelector'
 import { FunctionaryChildSelector } from '@/components/mi-pedido/FunctionaryChildSelector'
 import { OrderSummary } from '@/components/mi-pedido/OrderSummary'
+import { WeeklyMenuView } from '@/components/menu/WeeklyMenuView'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
+import { useOrderStore } from '@/store/orderStore'
 
 export default function MenuPage() {
   const router = useRouter()
-  const { user, isLoading: authLoading, isAuthenticated } = useAuth()
-  const { 
-    weekMenu, 
-    isLoading, 
-    error, 
-    weekInfo, 
-    refetch 
-  } = useWeeklyMenuData({ 
-    user, 
-    useAdminData: false
-  })
+  const { user, loading: authLoading } = useAuth()
+  // Extraemos lo que necesitamos del hook de orden y manejo de menú
+  const { menuPublished, publishMenu, hideMenu, loading: loadingMenu } = useOrderManagement()
+  // El estado de pedido y sus utilidades
+  const { currentChild, setCurrentChild, children, loading: loadingChildren } = useOrderStore()
+  // Estado para el toggle de menú personal (funcionarios)
+  const [usePersonalMenu, setUsePersonalMenu] = useState(false)
+  // Estado para controlar sidebar en móvil
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
+  // Estado para el procesamiento de pagos
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false)
+
+  useEffect(() => {
+    // Si no está autenticado y termina la carga, redireccionar
+    if (!user && !authLoading) {
+      router.push('/login')
+    }
+    
+    // Si es funcionario, activar el menú personal por defecto
+    if (user?.tipo === 'funcionario') {
+      setUsePersonalMenu(true)
+    }
+  }, [user, authLoading, router])
+
+  // Manejo de selección de niño
+  const handleChildSelect = (childId: string | null) => {
+    const child = children.find((c: { id: string }) => c.id === childId) || null;
+    setCurrentChild(child);
+    if (childId) {
+      setUsePersonalMenu(false);
+    }
+    // Cerrar sidebar en móvil al seleccionar
+    setMobileSidebarOpen(false);
+  }
+
+  // Toggle para funcionarios entre menú personal y de hijos
+  const handlePersonalToggle = (usePersonal: boolean) => {
+    setUsePersonalMenu(usePersonal);
+    if (usePersonal) {
+      setCurrentChild(null);
+    }
+    // Cerrar sidebar en móvil al seleccionar
+    setMobileSidebarOpen(false);
+  }
   
-  // Hooks de gestión de pedidos
-  const { isProcessingPayment, processPayment } = useOrderManagement()
-
-  const [selectedDayIndex, setSelectedDayIndex] = useState(0)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  // Redireccionar si no está autenticado
-  useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
-      router.push('/auth/login')
-    }
-  }, [authLoading, isAuthenticated, router])
-
-  // Seleccionar día actual por defecto
-  useEffect(() => {
-    if (weekMenu.length > 0) {
-      const today = new Date().toISOString().split('T')[0]
-      const todayIndex = weekMenu.findIndex(day => day.date === today)
-      if (todayIndex !== -1) {
-        setSelectedDayIndex(todayIndex)
-      }
-    }
-  }, [weekMenu])
-
-  const handleLogout = async () => {
+  // Manejar la acción de proceder al pago
+  const handleProceedToPayment = async () => {
+    setIsProcessingPayment(true);
     try {
-      router.push('/')
+      // Aquí iría la lógica de procesamiento de pago
+      await new Promise(resolve => setTimeout(resolve, 1500));
     } catch (error) {
-      console.error('Error al cerrar sesión:', error)
+      console.error('Error en el proceso de pago:', error);
+    } finally {
+      setIsProcessingPayment(false);
     }
   }
 
-  const getDayStatus = (dayMenu: { date: string }) => {
-    const today = new Date().toISOString().split('T')[0]
-    if (dayMenu.date === today) return 'today'
-    if (dayMenu.date < today) return 'past'
-    return 'future'
-  }
-
-  const getDayIcon = (index: number) => {
-    return index < 5 ? <Utensils className="w-4 h-4" /> : <Coffee className="w-4 h-4" />
-  }
-
-  // Loading state para autenticación
+  // Mostrar esqueleto durante la carga
   if (authLoading) {
-    return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="text-center">
-            <div className="loading-spinner w-8 h-8 mx-auto mb-4"></div>
-            <p className="text-slate-600 dark:text-slate-400 text-clean">
-              Verificando autenticación...
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+    return <MenuSkeleton />
   }
-
-  if (!user) {
-    return null
-  }
-
-  const selectedDay = weekMenu[selectedDayIndex]
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
-      <Navbar onLogout={handleLogout} />
-
-      <div className="flex h-[calc(100vh-4rem)]">
-        {/* Sidebar - Días de la semana */}
-        <div className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
-        )}>
-          <div className="flex flex-col h-full">
-            {/* Header del sidebar */}
-            <div className="p-6 border-b border-slate-200 dark:border-slate-700">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                    Menú Semanal
-                  </h2>
-                  {weekInfo && (
-                    <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
-                      {weekInfo.weekLabel}
-                    </p>
-                  )}
-                </div>
-                <Button
-                  variant="ghost"
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <div className="container px-4 py-4 md:py-8 max-w-screen-xl mx-auto">
+        {/* Alerta para administradores sobre estado de publicación del menú */}
+        {user?.tipo === 'admin' && (
+          <Alert className="mb-6">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertDescription>
+              {menuPublished 
+                ? "El menú está actualmente publicado y visible para todos los usuarios."
+                : "El menú está oculto y solo visible para administradores."}
+              <div className="mt-2">
+                <Button 
+                  variant={menuPublished ? "destructive" : "default"}
                   size="sm"
-                  onClick={() => setSidebarOpen(false)}
-                  className="lg:hidden"
+                  onClick={menuPublished ? hideMenu : publishMenu}
                 >
-                  <X className="w-4 h-4" />
+                  {menuPublished ? "Ocultar Menú" : "Publicar Menú"}
                 </Button>
               </div>
-
-              {/* Badges de información */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                <Badge variant="secondary" className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                  <CheckCircle className="w-3 h-3 mr-1" />
-                  Publicado
-                </Badge>
-                <Badge variant="outline" className="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                  {user.tipoUsuario === 'funcionario' ? 'Funcionario' : 'Apoderado'}
-                </Badge>
-              </div>
-            </div>
-
-            {/* Lista de días */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-2">
-              {isLoading ? (
-                <div className="space-y-3">
-                  {[...Array(7)].map((_, i) => (
-                    <div key={i} className="h-16 bg-slate-100 dark:bg-slate-700 rounded-lg animate-pulse" />
-                  ))}
-                </div>
-              ) : weekMenu.length > 0 ? (
-                weekMenu.map((dayMenu, index) => {
-                  const status = getDayStatus(dayMenu)
-                  const isSelected = selectedDayIndex === index
-                  
-                  return (
-                    <motion.button
-                      key={dayMenu.date}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      onClick={() => {
-                        setSelectedDayIndex(index)
-                        setSidebarOpen(false)
-                      }}
-                      className={cn(
-                        "w-full p-4 rounded-lg border text-left transition-all duration-200 hover:shadow-md",
-                        isSelected
-                          ? "bg-blue-50 dark:bg-blue-900/30 border-blue-200 dark:border-blue-700 shadow-sm"
-                          : "bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600",
-                        status === 'past' && "opacity-60"
-                      )}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <div className={cn(
-                            "w-8 h-8 rounded-lg flex items-center justify-center",
-                            status === 'today'
-                              ? "bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400"
-                              : status === 'past'
-                              ? "bg-slate-100 dark:bg-slate-600 text-slate-500 dark:text-slate-400"
-                              : "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400"
-                          )}>
-                            {getDayIcon(index)}
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center space-x-2">
-                              <h3 className="font-medium text-slate-900 dark:text-slate-100 truncate">
-                                {dayMenu.dayLabel}
-                              </h3>
-                              {status === 'today' && (
-                                <Badge variant="secondary" className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 text-xs">
-                                  Hoy
-                                </Badge>
-                              )}
-                            </div>
-                            <p className="text-sm text-slate-600 dark:text-slate-400 truncate">
-                              {dayMenu.dateFormatted}
-                            </p>
-                            <div className="flex items-center space-x-2 mt-1">
-                              {dayMenu.hasItems ? (
-                                <>
-                                  {dayMenu.almuerzos.length > 0 && (
-                                    <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-2 py-0.5 rounded-full">
-                                      {dayMenu.almuerzos.length} almuerzo{dayMenu.almuerzos.length !== 1 ? 's' : ''}
-                                    </span>
-                                  )}
-                                  {dayMenu.colaciones.length > 0 && (
-                                    <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300 px-2 py-0.5 rounded-full">
-                                      {dayMenu.colaciones.length} colación{dayMenu.colaciones.length !== 1 ? 'es' : ''}
-                                    </span>
-                                  )}
-                                </>
-                              ) : (
-                                <span className="text-xs bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-0.5 rounded-full">
-                                  Sin menú
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        {isSelected && (
-                          <ChevronRight className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                        )}
-                      </div>
-                    </motion.button>
-                  )
-                })
-              ) : (
-                <div className="text-center py-8">
-                  <CalendarX className="w-12 h-12 text-slate-400 mx-auto mb-3" />
-                  <p className="text-slate-600 dark:text-slate-400 text-sm">
-                    No hay menús disponibles
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Footer del sidebar */}
-            <div className="p-4 border-t border-slate-200 dark:border-slate-700">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">Almuerzo:</span>
-                  <span className="font-medium text-slate-900 dark:text-slate-100">
-                    ${user.tipoUsuario === 'funcionario' ? '4.875' : '5.500'}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 dark:text-slate-400">Colación:</span>
-                  <span className="font-medium text-slate-900 dark:text-slate-100">
-                    ${user.tipoUsuario === 'funcionario' ? '4.875' : '5.500'}
-                  </span>
-                </div>
-                <Button
-                  onClick={() => router.push('/mi-pedido')}
-                  className="w-full mt-3"
-                  size="sm"
-                >
-                  <Zap className="w-4 h-4 mr-2" />
-                  Hacer Pedido
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Overlay para móvil */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden"
-            onClick={() => setSidebarOpen(false)}
-          />
+            </AlertDescription>
+          </Alert>
         )}
+        
+        {/* Vista principal con sidebar y menú */}
+        <div className="flex flex-col lg:flex-row gap-6">
+          {/* Botón para mostrar sidebar en móvil */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="lg:hidden self-start mb-2"
+            onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
+          >
+            {mobileSidebarOpen ? (
+              <X className="h-4 w-4" />
+            ) : (
+              <MenuIcon className="h-4 w-4" />
+            )}
+          </Button>
 
-        {/* Contenido principal */}
-        <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
-          {/* Header del contenido principal */}
-          <div className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 p-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-4">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden"
-                >
-                  <MenuIcon className="w-4 h-4" />
-                </Button>
-                <div>
-                  <h1 className="text-xl font-semibold text-slate-900 dark:text-slate-100">
-                    {selectedDay ? selectedDay.dayLabel : 'Selecciona un día'}
-                  </h1>
-                  {selectedDay && (
-                    <p className="text-sm text-slate-600 dark:text-slate-400">
-                      {selectedDay.dateFormatted}
-                    </p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={refetch}
-                  disabled={isLoading}
-                >
-                  <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => router.push('/panel')}
-                >
-                  Volver al Panel
-                </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Contenedor principal con grid */}
-          <div className="flex-1 p-4 lg:p-6 overflow-y-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Botón de menú móvil */}
-              <div className="lg:hidden flex justify-between items-center mb-4 col-span-full">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSidebarOpen(true)}
-                  className="flex items-center gap-2"
-                >
-                  <MenuIcon className="w-4 h-4" />
-                  Ver días
-                </Button>
-                <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={refetch}
-                    disabled={isLoading}
-                  >
-                    <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push('/panel')}
-                  >
-                    Volver al Panel
-                  </Button>
-                </div>
-              </div>
-
-              {/* Contenido central - Menú del día */}
-              <div className="lg:col-span-3">
-                <div className="hidden lg:flex justify-end space-x-2 mb-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={refetch}
-                    disabled={isLoading}
-                  >
-                    <RefreshCw className={cn("w-4 h-4", isLoading && "animate-spin")} />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => router.push('/panel')}
-                  >
-                    Volver al Panel
-                  </Button>
-                </div>
-
-                <AnimatePresence mode="wait">
-                  {isLoading ? (
-                    <motion.div
-                      key="loading"
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                    >
-                      <MenuSkeleton />
-                    </motion.div>
-                  ) : error ? (
-                    <motion.div
-                      key="error"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                    >
-                      <Alert variant="destructive" className="max-w-2xl mx-auto">
-                        <AlertTriangle className="h-4 w-4" />
-                        <AlertDescription className="flex items-center justify-between">
-                          <span>{error}</span>
-                          <Button variant="outline" size="sm" onClick={refetch} className="ml-4">
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            Reintentar
-                          </Button>
-                        </AlertDescription>
-                      </Alert>
-                    </motion.div>
-                  ) : weekMenu.length === 0 ? (
-                    <motion.div
-                      key="empty"
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="max-w-2xl mx-auto"
-                    >
-                      <Card className="shadow-soft-lg border-0 bg-white dark:bg-slate-800">
-                        <CardContent className="p-12 text-center">
-                          <div className="w-20 h-20 bg-gradient-to-br from-amber-100 to-amber-50 dark:from-amber-900/30 dark:to-amber-800/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                            <CalendarX className="w-10 h-10 text-amber-600 dark:text-amber-400" />
-                          </div>
-                          <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-100 mb-3">
-                            Menú no disponible
-                          </h2>
-                          <p className="text-slate-600 dark:text-slate-400 text-lg leading-relaxed mb-8">
-                            El menú para esta semana aún no ha sido publicado.
-                            Por favor, vuelve a consultar más tarde.
-                          </p>
-                          <Button onClick={refetch} className="flex items-center space-x-2 px-6 py-3">
-                            <RefreshCw size={18} />
-                            <span>Verificar</span>
-                          </Button>
-                        </CardContent>
-                      </Card>
-                    </motion.div>
-                  ) : selectedDay ? (
-                    <motion.div
-                      key={`day-${selectedDayIndex}`}
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.3 }}
-                      className="max-w-4xl mx-auto"
-                    >
-                      <DayMenuCard
-                        dayMenu={selectedDay}
-                        userType={user.tipoUsuario}
-                        index={selectedDayIndex}
-                      />
-                    </motion.div>
-                  ) : null}
-                </AnimatePresence>
-              </div>
-
-              {/* Sidebar derecha - Selector de hijos y resumen del pedido */}
-              <div className="lg:col-span-1 space-y-6">
-                {/* Selector de hijos según tipo de usuario */}
-                {user.tipoUsuario === 'apoderado' ? (
-                  <ChildSelector user={user} isReadOnly={false} />
-                ) : (
-                  <FunctionaryChildSelector user={user} isReadOnly={false} />
+          {/* Sidebar con selección de niño y resumen de pedido */}
+          <AnimatePresence>
+            {(mobileSidebarOpen || (!mobileSidebarOpen && typeof window !== 'undefined' && window.innerWidth >= 1024)) && (
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className={cn(
+                  "w-full lg:w-72 shrink-0",
+                  mobileSidebarOpen ? "fixed inset-0 bg-white z-50 p-4 overflow-auto" : "relative"
                 )}
-
-                {/* Resumen del pedido */}
-                <OrderSummary 
-                  user={user}
-                  onProceedToPayment={processPayment}
-                  isProcessingPayment={isProcessingPayment}
-                />
+              >
+                <Card className="mb-4">
+                  <CardContent className="p-4">
+                    <h2 className="font-bold text-lg mb-4">Seleccionar niño</h2>
+                    
+                    {loadingChildren ? (
+                      <p>Cargando...</p>
+                    ) : user?.tipoUsuario === 'apoderado' && user ? (
+                      <ChildSelector 
+                        user={user}
+                        isReadOnly={false}
+                      />
+                    ) : user?.tipoUsuario === 'funcionario' && user ? (
+                      <FunctionaryChildSelector 
+                        user={user}
+                        isReadOnly={false}
+                      />
+                    ) : null}
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-4">
+                    <OrderSummary 
+                      user={user || { 
+                        id: '0', 
+                        email: '', 
+                        tipoUsuario: 'invitado', 
+                        userType: 'apoderado',
+                        firstName: '', 
+                        lastName: '',
+                        isActive: true,
+                        createdAt: new Date()
+                      }} as any
+                      onProceedToPayment={handleProceedToPayment}
+                      isProcessingPayment={isProcessingPayment}
+                    />
+                  </CardContent>
+                </Card>
+                {/* Botón para cerrar sidebar en móvil */}
+                {mobileSidebarOpen && (
+                  <Button 
+                    className="mt-4 w-full" 
+                    onClick={() => setMobileSidebarOpen(false)}
+                  >
+                    Cerrar
+                  </Button>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          {/* Menú semanal */}
+          <div className="flex-grow">
+            {user?.tipo === 'admin' && (
+              <div className="mb-4">
+                <h1 className="text-2xl font-bold">Gestión de Menú</h1>
               </div>
-            </div>
+            )}
+            
+            {/* Vista de Menú Semanal */}
+            {loadingMenu ? (
+              <MenuSkeleton />
+            ) : (
+              <WeeklyMenuView 
+                user={user || { 
+                  id: '0', 
+                  email: '', 
+                  tipoUsuario: 'invitado',
+                  userType: 'apoderado',
+                  firstName: '', 
+                  lastName: '',
+                  isActive: true,
+                  createdAt: new Date()
+                } as any}
+                currentChild={currentChild}
+              />
+            )}
           </div>
         </div>
       </div>
