@@ -5,17 +5,15 @@ import { useWeeklyMenuData } from '@/hooks/useWeeklyMenuData'
 import { DayMenuDisplay, MenuItem } from '@/types/menu'
 import { Child } from '@/types/user'
 import { User } from '@/types/panel'
-import { format, addWeeks, subWeeks, startOfWeek, addDays } from 'date-fns'
+import { format, addWeeks, subWeeks, startOfWeek, addDays, isToday } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { 
   Card, 
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle
 } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
 import { MenuItemCompact } from './MenuItemCompact'
 import { 
   ChevronLeft, 
@@ -109,17 +107,6 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
     setCurrentDate((prevDate: Date) => addWeeks(prevDate, 1))
   }
   
-  // Verificar si una fecha es hoy
-  const isToday = (date: Date) => {
-    const today = new Date()
-    return date.toDateString() === today.toDateString()
-  }
-  
-  // Formatear fecha para obtener datos del menú
-  const formatDateForApi = (date: Date) => {
-    return format(date, 'yyyy-MM-dd')
-  }
-
   return (
     <div className="space-y-6">
       {/* Navegación semanal */}
@@ -130,12 +117,14 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
-        <div className="flex items-center gap-2">
-          <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-          <span className="font-medium text-slate-800 dark:text-slate-200">
-            {weekDates && `Semana del ${format(weekDates[0], 'd', { locale: es })} al ${format(addDays(weekDates[0], 4), 'd MMM, yyyy', { locale: es })}`}
+        
+        <div className="flex items-center space-x-2">
+          <Calendar className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+          <span className="font-medium text-slate-700 dark:text-slate-300">
+            Semana del {format(weekDates[0] || new Date(), 'd', { locale: es })} al {format(weekDates[4] || new Date(), 'd', { locale: es })} de {format(weekDates[0] || new Date(), 'MMMM', { locale: es })}
           </span>
         </div>
+        
         <button 
           onClick={handleNextWeek} 
           className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition"
@@ -143,25 +132,34 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
-
-      {/* Estado de carga */}
+      
+      {/* Estado de carga, error o contenido */}
       {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="flex flex-col items-center gap-3">
-            <Skeleton className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400" />
-            <p className="text-slate-600 dark:text-slate-400">Cargando menú semanal...</p>
+        <div className="space-y-4">
+          <div className="flex justify-center items-center py-8">
+            <div className="text-center">
+              <Skeleton className="h-8 w-8 rounded-full mx-auto mb-4 animate-pulse" />
+              <p className="text-sm text-slate-500 dark:text-slate-400">
+                Cargando menú semanal...
+              </p>
+            </div>
           </div>
         </div>
       ) : error ? (
-        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
-          <p className="text-red-600 dark:text-red-400">{error}</p>
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-6">
+          <div className="flex items-start space-x-3">
+            <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
+            <p className="text-sm text-red-600 dark:text-red-400">
+              Error al cargar el menú: {error.message || 'Error desconocido'}.
+              Por favor, intenta de nuevo más tarde.
+            </p>
+          </div>
         </div>
-      ) : weekMenu.length === 0 ? (
-        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 text-center">
-          <div className="flex flex-col items-center gap-2">
-            <AlertTriangle className="w-8 h-8 text-amber-500 dark:text-amber-400" />
-            <h3 className="text-lg font-medium text-amber-800 dark:text-amber-300">No hay menú disponible</h3>
-            <p className="text-amber-600 dark:text-amber-400 max-w-md mx-auto">
+      ) : weekMenu?.length === 0 ? (
+        <div className="bg-amber-50 dark:bg-amber-900/20 rounded-lg p-6">
+          <div className="flex items-start space-x-3">
+            <AlertTriangle className="w-5 h-5 text-amber-600 dark:text-amber-400 mt-0.5" />
+            <p className="text-sm text-amber-600 dark:text-amber-400">
               No se encontró información de menú para esta semana. Por favor, inténtelo más tarde.
             </p>
           </div>
@@ -169,8 +167,7 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {weekDates.map((date: Date, index: number) => {
-            const formattedDate = formatDateForApi(date)
-            const dayMenu = orderedMenus[formattedDate]
+            const dayMenu = orderedMenus[format(date, 'yyyy-MM-dd')]
             const dayName = format(date, 'EEEE', { locale: es })
             const dayNumber = format(date, 'd', { locale: es })
             
