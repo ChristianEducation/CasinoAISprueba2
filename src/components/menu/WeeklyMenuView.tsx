@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useWeeklyMenuData } from '@/hooks/useWeeklyMenuData'
 import { DayMenuDisplay, MenuItem } from '@/types/menu'
 import { Child } from '@/types/user'
@@ -53,12 +53,27 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
   const [currentDate, setCurrentDate] = useState(new Date())
   const [weekDates, setWeekDates] = useState<Date[]>([])
   
+  // Preprocesar el usuario para useWeeklyMenuData para evitar renderizaciones innecesarias
+  const safeUser = useMemo(() => {
+    try {
+      // Asegurarnos de que el usuario tiene todos los campos necesarios
+      return {
+        id: user.id,
+        email: user.email,
+        name: user.firstName + ' ' + user.lastName,
+        tipoUsuario: user.tipoUsuario === 'invitado' ? 'apoderado' : user.tipoUsuario,
+        active: true
+      } as User
+    } catch (e) {
+      console.error("Error preparando usuario para hook:", e);
+      // Devolver un usuario mínimo para evitar errores
+      return null;
+    }
+  }, [user.id, user.email, user.tipoUsuario, user.firstName, user.lastName]);
+  
   // Cargar datos del menú semanal
   const { weekMenu, isLoading, error } = useWeeklyMenuData({ 
-    user: {
-      ...user,
-      tipoUsuario: user.tipoUsuario === 'invitado' ? 'apoderado' : user.tipoUsuario
-    } as User, 
+    user: safeUser,
     useAdminData: false
   })
   
