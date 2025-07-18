@@ -54,7 +54,10 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
   
   // Cargar datos del menú semanal
   const { weekMenu, isLoading, error } = useWeeklyMenuData({ 
-    user, 
+    user: {
+      ...user,
+      tipoUsuario: user.tipoUsuario === 'invitado' ? 'apoderado' : user.tipoUsuario
+    } as any, 
     useAdminData: false
   })
   
