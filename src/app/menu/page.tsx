@@ -44,20 +44,6 @@ export default function MenuPage() {
     }
   }, [user, authLoading, router])
 
-  // Manejo de selección de niño
-  const handleChildSelect = (childId: string | null) => {
-    const child = children.find((c: { id: string }) => c.id === childId) || null;
-    setCurrentChild(child);
-    // Cerrar sidebar en móvil al seleccionar
-    setMobileSidebarOpen(false);
-  }
-
-  // Toggle para funcionarios entre menú personal y de hijos
-  const handlePersonalToggle = () => {
-    // Cerrar sidebar en móvil al seleccionar
-    setMobileSidebarOpen(false);
-  }
-  
   // Manejar la acción de proceder al pago
   const handleProceedToPayment = async () => {
     setIsProcessingPayment(true);
@@ -140,7 +126,6 @@ export default function MenuPage() {
                       <ChildSelector 
                         user={user}
                         isReadOnly={false}
-                        onChildSelect={handleChildSelect}
                       />
                     ) : user?.tipoUsuario === 'funcionario' && user ? (
                       <FunctionaryChildSelector 
