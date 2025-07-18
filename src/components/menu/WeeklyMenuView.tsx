@@ -35,7 +35,7 @@ interface ExtendedUser {
   userType?: 'funcionario' | 'apoderado'
   tipoUsuario: 'funcionario' | 'apoderado' | 'invitado'
   children?: Child[]
-  isActive?: boolean
+  active: boolean
   createdAt?: Date
 }
 
