@@ -31,7 +31,7 @@ export default function MenuPage() {
   // Extraemos funcionalidad de admin para publicación de menú
   const { menuPublished, publishMenu, hideMenu } = useMenuAdmin()
   // El estado de pedido y sus utilidades
-  const { currentChild, setCurrentChild, children, isLoading: loadingChildren } = useOrderStore()
+  const { currentChild, isLoading: loadingChildren } = useOrderStore()
   // Estado para controlar sidebar en móvil
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
   // Estado para el procesamiento de pagos
