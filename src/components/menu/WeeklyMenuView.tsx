@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useWeeklyMenuData } from '@/hooks/useWeeklyMenuData'
 import { DayMenuDisplay, MenuItem } from '@/types/menu'
 import { Child } from '@/types/user'
+import { User } from '@/types/panel'
 import { format, addWeeks, subWeeks, startOfWeek, addDays } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { 
@@ -57,7 +58,7 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
     user: {
       ...user,
       tipoUsuario: user.tipoUsuario === 'invitado' ? 'apoderado' : user.tipoUsuario
-    } as any, 
+    } as User, 
     useAdminData: false
   })
   
