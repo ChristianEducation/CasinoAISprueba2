@@ -100,12 +100,12 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
   }, [currentDate])
   
   // Navegar a semana anterior
-  const goToPreviousWeek = () => {
+  const handlePreviousWeek = () => {
     setCurrentDate((prevDate: Date) => subWeeks(prevDate, 1))
   }
   
   // Navegar a semana siguiente
-  const goToNextWeek = () => {
+  const handleNextWeek = () => {
     setCurrentDate((prevDate: Date) => addWeeks(prevDate, 1))
   }
   
@@ -122,81 +122,50 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
 
   return (
     <div className="space-y-6">
-      {/* Navegador de semanas */}
-      <Card className="border-0 shadow-lg bg-white dark:bg-slate-800">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={goToPreviousWeek}
-              className="h-9 w-9"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </Button>
-            
-            <CardTitle className="text-xl flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-blue-600 dark:text-blue-400" />
-              <span>
-                Semana del {format(weekDates[0] || new Date(), 'd', { locale: es })} al {format(weekDates[4] || addDays(weekDates[0] || new Date(), 4), 'd MMM, yyyy', { locale: es })}
-              </span>
-            </CardTitle>
-            
-            <Button 
-              variant="outline" 
-              size="icon" 
-              onClick={goToNextWeek}
-              className="h-9 w-9"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </Button>
-          </div>
-        </CardHeader>
-      </Card>
-      
+      {/* Navegación semanal */}
+      <div className="flex justify-between items-center bg-white dark:bg-slate-800 rounded-lg shadow-sm px-4 py-3">
+        <button 
+          onClick={handlePreviousWeek} 
+          className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <div className="flex items-center gap-2">
+          <Calendar className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <span className="font-medium text-slate-800 dark:text-slate-200">
+            {weekDates && `Semana del ${format(weekDates[0], 'd', { locale: es })} al ${format(addDays(weekDates[0], 4), 'd MMM, yyyy', { locale: es })}`}
+          </span>
+        </div>
+        <button 
+          onClick={handleNextWeek} 
+          className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Estado de carga */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {Array(5).fill(0).map((_, i) => (
-            <Card key={`skeleton-${i}`} className="border-0 shadow-lg">
-              <CardHeader className="pb-2">
-                <Skeleton className="h-6 w-24 mb-1" />
-                <Skeleton className="h-4 w-16" />
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Skeleton className="h-5 w-24 mb-3" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                  </div>
-                </div>
-                <Separator />
-                <div>
-                  <Skeleton className="h-5 w-24 mb-3" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-16 w-full" />
-                    <Skeleton className="h-16 w-full" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex justify-center py-12">
+          <div className="flex flex-col items-center gap-3">
+            <Skeleton className="w-8 h-8 animate-spin text-blue-600 dark:text-blue-400" />
+            <p className="text-slate-600 dark:text-slate-400">Cargando menú semanal...</p>
+          </div>
         </div>
       ) : error ? (
-        <Card className="border-0 shadow-lg bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
-          <CardContent className="p-6 text-center">
-            <AlertTriangle className="h-12 w-12 text-red-600 dark:text-red-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-red-800 dark:text-red-200 mb-2">Error al cargar el menú</h3>
-            <p className="text-red-600 dark:text-red-300">No se pudieron cargar los datos del menú. Por favor intenta recargar la página.</p>
-            <Button 
-              onClick={() => {}} 
-              variant="outline"
-              className="mt-4 bg-white dark:bg-red-900/30"
-            >
-              Reintentar
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 text-center">
+          <p className="text-red-600 dark:text-red-400">{error}</p>
+        </div>
+      ) : weekMenu.length === 0 ? (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-6 text-center">
+          <div className="flex flex-col items-center gap-2">
+            <AlertTriangle className="w-8 h-8 text-amber-500 dark:text-amber-400" />
+            <h3 className="text-lg font-medium text-amber-800 dark:text-amber-300">No hay menú disponible</h3>
+            <p className="text-amber-600 dark:text-amber-400 max-w-md mx-auto">
+              No se encontró información de menú para esta semana. Por favor, inténtelo más tarde.
+            </p>
+          </div>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           {weekDates.map((date: Date, index: number) => {
@@ -208,89 +177,89 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
             return (
               <Card 
                 key={`day-${index}`}
-                className={`border-0 shadow-lg ${isToday(date) ? 'bg-blue-50 dark:bg-blue-900/20' : 'bg-white dark:bg-slate-800'}`}
+                className={`overflow-hidden ${!dayMenu?.hasItems ? 'opacity-60' : ''}`}
               >
-                <CardHeader className="pb-2">
+                <CardHeader className="pb-2 bg-gradient-to-r from-slate-50 to-white dark:from-slate-800 dark:to-slate-800/80">
                   <div className="flex justify-between items-center">
-                    <div>
-                      <CardTitle className="capitalize">{dayName}</CardTitle>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">{dayNumber} {format(date, 'MMM', { locale: es })}</p>
-                    </div>
-                    
-                    {isToday(date) && (
-                      <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">
-                        Hoy
-                      </Badge>
-                    )}
+                    <CardTitle className="text-base font-medium text-slate-700 dark:text-slate-300">
+                      {dayName}
+                    </CardTitle>
+                    <CardDescription className="text-sm font-normal">
+                      {dayNumber} {format(date, 'MMM', { locale: es })}
+                    </CardDescription>
                   </div>
                 </CardHeader>
                 
-                <CardContent className="space-y-4">
-                  {/* Sección de Almuerzos */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Utensils className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                      <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100">Almuerzos</h3>
-                      <Badge variant="outline" className="text-xs">
-                        12:00 - 14:00
-                      </Badge>
+                <CardContent className="p-0">
+                  {dayMenu && dayMenu.hasItems ? (
+                    <div className="divide-y divide-slate-100 dark:divide-slate-800">
+                      {/* Almuerzos */}
+                      <div className="p-4">
+                        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                          <Utensils className="w-4 h-4" />
+                          <span>Almuerzos</span>
+                          <span className="text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded">
+                            12:00 - 14:00
+                          </span>
+                        </h3>
+                        
+                        {dayMenu.almuerzos && dayMenu.almuerzos.length > 0 ? (
+                          <div className="space-y-3">
+                            {dayMenu.almuerzos.map((item: MenuItem, itemIndex: number) => (
+                              <MenuItemCompact 
+                                key={`almuerzo-${item.id}-${itemIndex}`}
+                                item={item}
+                                date={dayMenu.date}
+                                userType={safeUserType}
+                                child={currentChild}
+                                optionNumber={itemIndex + 1}
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-3 text-sm text-slate-500 dark:text-slate-400 italic">
+                            No hay opciones disponibles
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Colaciones */}
+                      <div className="p-4">
+                        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
+                          <Coffee className="w-4 h-4" />
+                          <span>Colaciones</span>
+                          <span className="text-xs bg-orange-100 dark:bg-orange-900/30 text-orange-700 dark:text-orange-300 px-1.5 py-0.5 rounded">
+                            15:30 - 16:30
+                          </span>
+                        </h3>
+                        
+                        {dayMenu.colaciones && dayMenu.colaciones.length > 0 ? (
+                          <div className="space-y-3">
+                            {dayMenu.colaciones.map((item: MenuItem, itemIndex: number) => (
+                              <MenuItemCompact 
+                                key={`colacion-${item.id}-${itemIndex}`}
+                                item={item}
+                                date={dayMenu.date}
+                                userType={safeUserType}
+                                child={currentChild}
+                                optionNumber={itemIndex + 1}
+                              />
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="text-center py-3 text-sm text-slate-500 dark:text-slate-400 italic">
+                            No hay opciones disponibles
+                          </div>
+                        )}
+                      </div>
                     </div>
-                    
-                    {dayMenu && dayMenu.hasItems && dayMenu.almuerzos && dayMenu.almuerzos.length > 0 ? (
-                      <div className="space-y-2">
-                        {dayMenu.almuerzos.map((item: MenuItem, itemIndex: number) => (
-                          <MenuItemCompact 
-                            key={`almuerzo-${item.id}-${itemIndex}`}
-                            item={item}
-                            date={dayMenu.date}
-                            userType={safeUserType}
-                            child={currentChild}
-                            optionNumber={itemIndex + 1}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="border border-dashed border-slate-200 dark:border-slate-700 rounded-md p-3 text-center">
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          No hay opciones disponibles
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <Separator />
-                  
-                  {/* Sección de Colaciones */}
-                  <div>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Coffee className="h-4 w-4 text-slate-600 dark:text-slate-400" />
-                      <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100">Colaciones</h3>
-                      <Badge variant="outline" className="text-xs">
-                        15:30 - 16:30
-                      </Badge>
+                  ) : (
+                    <div className="p-6 text-center">
+                      <p className="text-slate-500 dark:text-slate-400">
+                        No hay opciones disponibles para este día
+                      </p>
                     </div>
-                    
-                    {dayMenu && dayMenu.hasItems && dayMenu.colaciones && dayMenu.colaciones.length > 0 ? (
-                      <div className="space-y-2">
-                        {dayMenu.colaciones.map((item: MenuItem, itemIndex: number) => (
-                          <MenuItemCompact 
-                            key={`colacion-${item.id}-${itemIndex}`}
-                            item={item}
-                            date={dayMenu.date}
-                            userType={safeUserType}
-                            child={currentChild}
-                            optionNumber={itemIndex + 1}
-                          />
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="border border-dashed border-slate-200 dark:border-slate-700 rounded-md p-3 text-center">
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          No hay opciones disponibles
-                        </p>
-                      </div>
-                    )}
-                  </div>
+                  )}
                 </CardContent>
               </Card>
             )
