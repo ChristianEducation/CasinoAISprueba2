@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { AdminService } from '@/services/adminService'
+import { AdminMenuService } from '@/services/adminMenuService'
 
 interface UseMenuAdminReturn {
   menuPublished: boolean
@@ -44,8 +45,12 @@ export function useMenuAdmin(): UseMenuAdminReturn {
     try {
       setIsLoading(true)
       const currentWeek = AdminService.getCurrentWeekInfo()
-      await AdminService.publishMenu(currentWeek.start)
-      setMenuPublished(true)
+      const result = await AdminMenuService.toggleWeekPublication(currentWeek.start, true)
+      if (result.success) {
+        setMenuPublished(true)
+      } else {
+        throw new Error(result.message || 'Error al publicar el menú')
+      }
     } catch (err) {
       console.error('Error al publicar el menú:', err)
       setError('No se pudo publicar el menú')
@@ -59,8 +64,12 @@ export function useMenuAdmin(): UseMenuAdminReturn {
     try {
       setIsLoading(true)
       const currentWeek = AdminService.getCurrentWeekInfo()
-      await AdminService.hideMenu(currentWeek.start)
-      setMenuPublished(false)
+      const result = await AdminMenuService.toggleWeekPublication(currentWeek.start, false)
+      if (result.success) {
+        setMenuPublished(false)
+      } else {
+        throw new Error(result.message || 'Error al ocultar el menú')
+      }
     } catch (err) {
       console.error('Error al ocultar el menú:', err)
       setError('No se pudo ocultar el menú')
