@@ -181,7 +181,7 @@ export default function MenuPage() {
                   lastName: string;
                   tipoUsuario: 'funcionario' | 'apoderado' | 'invitado';
                   userType?: 'funcionario' | 'apoderado';
-                  isActive?: boolean;
+                  active: boolean; 
                   createdAt?: Date;
                 }} 
                 currentChild={currentChild}
