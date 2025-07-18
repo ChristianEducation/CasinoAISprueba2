@@ -172,11 +172,24 @@ export default function MenuPage() {
             {/* Vista de Menú Semanal */}
             {loadingMenu ? (
               <MenuSkeleton />
-            ) : (
+            ) : user ? (
               <WeeklyMenuView 
-                user={user} 
+                user={user as unknown as { 
+                  id: string; 
+                  email: string; 
+                  firstName: string;
+                  lastName: string;
+                  tipoUsuario: 'funcionario' | 'apoderado' | 'invitado';
+                  userType?: 'funcionario' | 'apoderado';
+                  isActive?: boolean;
+                  createdAt?: Date;
+                }} 
                 currentChild={currentChild}
               />
+            ) : (
+              <div className="text-center py-8">
+                <p>Debes iniciar sesión para ver el menú</p>
+              </div>
             )}
           </div>
         </div>
