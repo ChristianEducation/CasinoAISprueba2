@@ -136,15 +136,18 @@ export default function MenuPage() {
                   </CardContent>
                 </Card>
                 
-                <Card>
-                  <CardContent className="p-4">
-                    <OrderSummary 
-                      user={user} 
-                      onProceedToPayment={handleProceedToPayment}
-                      isProcessingPayment={isProcessingPayment}
-                    />
-                  </CardContent>
-                </Card>
+                {user && (
+                  <Card>
+                    <CardContent className="p-4">
+                      <OrderSummary 
+                        user={user} 
+                        onProceedToPayment={handleProceedToPayment}
+                        isProcessingPayment={isProcessingPayment}
+                      />
+                    </CardContent>
+                  </Card>
+                )}
+                
                 {/* Botón para cerrar sidebar en móvil */}
                 {mobileSidebarOpen && (
                   <Button 
