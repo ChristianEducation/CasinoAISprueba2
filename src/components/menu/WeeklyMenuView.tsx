@@ -150,7 +150,7 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
           <div className="flex items-start space-x-3">
             <AlertTriangle className="w-5 h-5 text-red-600 dark:text-red-400 mt-0.5" />
             <p className="text-sm text-red-600 dark:text-red-400">
-              Error al cargar el menú: {error.message || 'Error desconocido'}.
+              Error al cargar el menú: {error || 'Error desconocido'}.
               Por favor, intenta de nuevo más tarde.
             </p>
           </div>
