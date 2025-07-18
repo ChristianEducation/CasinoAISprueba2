@@ -224,7 +224,6 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
                     {dayMenu && dayMenu.hasItems && dayMenu.almuerzos && dayMenu.almuerzos.length > 0 ? (
                       <div className="space-y-2">
                         {dayMenu.almuerzos.map((item: MenuItem, itemIndex: number) => (
-                          // @ts-expect-error - Ignorar errores de tipo durante el desarrollo
                           <MenuItemCompact 
                             key={`almuerzo-${item.id}-${itemIndex}`}
                             item={item}
@@ -259,7 +258,6 @@ export function WeeklyMenuView({ user, currentChild }: WeeklyMenuViewProps) {
                     {dayMenu && dayMenu.hasItems && dayMenu.colaciones && dayMenu.colaciones.length > 0 ? (
                       <div className="space-y-2">
                         {dayMenu.colaciones.map((item: MenuItem, itemIndex: number) => (
-                          // @ts-expect-error - Ignorar errores de tipo durante el desarrollo
                           <MenuItemCompact 
                             key={`colacion-${item.id}-${itemIndex}`}
                             item={item}
