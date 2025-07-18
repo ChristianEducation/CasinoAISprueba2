@@ -146,8 +146,6 @@ export default function MenuPage() {
                       <FunctionaryChildSelector 
                         user={user}
                         isReadOnly={false}
-                        onChildSelect={handleChildSelect}
-                        onPersonalToggle={handlePersonalToggle}
                       />
                     ) : null}
                   </CardContent>
