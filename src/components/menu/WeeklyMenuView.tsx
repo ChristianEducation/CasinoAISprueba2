@@ -27,7 +27,6 @@ import {
 } from 'lucide-react'
 import { Skeleton } from '@/components/ui/skeleton'
 
-// @ts-expect-error - Interfaz temporal para compilación
 interface ExtendedUser {
   id: string
   email: string
