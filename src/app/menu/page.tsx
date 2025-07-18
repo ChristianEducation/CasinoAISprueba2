@@ -23,18 +23,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 import { useOrderStore } from '@/store/orderStore'
 
-interface ExtendedUser {
-  id: string
-  email: string
-  tipoUsuario: string
-  userType: string
-  firstName: string
-  lastName: string
-  isActive: boolean
-  createdAt: Date
-  role?: 'funcionario' | 'apoderado' | 'admin' | 'super_admin'
-}
-
 export default function MenuPage() {
   const router = useRouter()
   const { user, isLoading: authLoading } = useAuth()
